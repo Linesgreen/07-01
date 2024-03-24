@@ -19,7 +19,6 @@ export class PostToBlogCreateModel {
   @Trim()
   @IsString()
   @Length(1, 30)
-  //@ApiProperty()
   title: string;
 
   @Trim()

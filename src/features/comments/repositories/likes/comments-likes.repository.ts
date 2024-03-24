@@ -9,7 +9,6 @@ import { LikeStatusType } from '../../types/comments/input';
 
 @Injectable()
 export class CommentsLikesRepository extends AbstractRepository<PostLikeWithLoginFromDb> {
-  private CommentLieksModel: any;
   constructor(@InjectDataSource() protected dataSource: DataSource) {
     super(dataSource);
   }

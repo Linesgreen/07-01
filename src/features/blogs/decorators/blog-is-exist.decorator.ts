@@ -8,7 +8,7 @@ import {
   ValidatorConstraintInterface,
 } from 'class-validator';
 
-import { BlogsQueryRepository } from '../repositories/blogs.query.repository';
+import { PostgresBlogsRepository } from '../repositories/postgres.blogs.repository';
 
 export function BlogIsExist(property?: string, validationOptions?: ValidationOptions) {
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
@@ -27,12 +27,11 @@ export function BlogIsExist(property?: string, validationOptions?: ValidationOpt
 @ValidatorConstraint({ name: 'BlogIsExist', async: true })
 @Injectable()
 export class BlogIsExistConstraint implements ValidatorConstraintInterface {
-  constructor(private readonly blogsQueryRepository: BlogsQueryRepository) {}
+  constructor(private readonly postgresBlogsRepository: PostgresBlogsRepository) {}
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async validate(value: any, args: ValidationArguments): Promise<boolean> {
-    const blog = await this.blogsQueryRepository.findById(value);
-    return !!blog;
+    return this.postgresBlogsRepository.chekBlogIsExist(value);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars

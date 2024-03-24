@@ -3,7 +3,6 @@ import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/c
 import { ConfigModule } from '@nestjs/config';
 import { CqrsModule } from '@nestjs/cqrs';
 import { JwtModule } from '@nestjs/jwt';
-import { MongooseModule } from '@nestjs/mongoose';
 import { PassportModule } from '@nestjs/passport';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -16,21 +15,16 @@ import { blogsProviders, blogsUseCases } from './features/blogs';
 import { BlogsController } from './features/blogs/controllers/blogs.controller';
 import { SaBlogsController } from './features/blogs/controllers/sa.blogs.controller';
 import { BlogIsExistConstraint } from './features/blogs/decorators/blog-is-exist.decorator';
-import { Blog, BlogSchema } from './features/blogs/repositories/blogs-schema';
 import { commentProviders, commentUseCases } from './features/comments';
 import { CommentsController } from './features/comments/controller/comments.controller';
-import { Comment, CommentSchema } from './features/comments/repositories/comments/comment.schema';
-import { CommentLikes, CommentsLikesSchema } from './features/comments/repositories/likes/comment-like.schema';
 import { postProviders, postsUseCases } from './features/posts';
 import { PostsController } from './features/posts/controllers/posts.controller';
-import { PostLikes, PostLikesSchema } from './features/posts/repositories/likes/post-likes.schema';
-import { Post, PostSchema } from './features/posts/repositories/post/post.schema';
 import { SecurityController } from './features/security/controllers/security.controller';
-import { SessionDb, SessionSchema } from './features/security/repository/seesion.schema';
+import { Session_Orm } from './features/security/entites/orm_session';
 import { TestingController } from './features/testing/controllers/testing.controller';
 import { userProviders } from './features/users';
 import { SaUserController } from './features/users/controllers/sa.user.controller';
-import { UserMongo, UserSchema } from './features/users/repositories/users-schema';
+import { User_Orm } from './features/users/entites/orm_user';
 import { QueryPaginationPipe } from './infrastructure/decorators/transform/query-pagination.pipe';
 import { ConfCodeIsValidConstraint } from './infrastructure/decorators/validate/conf-code.decorator';
 import { EmailIsConformedConstraint } from './infrastructure/decorators/validate/email-is-conformed.decorator';
@@ -68,20 +62,11 @@ const decorators = [
     ConfigModule.forRoot({ isGlobal: true }),
     //Регистрируем для работы в postgres
     TypeOrmModule.forRoot(configService.getTypeOrmConfig()),
+    TypeOrmModule.forFeature([User_Orm, Session_Orm]),
     //Регистрируем для испльзования Passport strategy
     PassportModule,
     //Регистрируем для испльзования @CommandHandler
     CqrsModule,
-    MongooseModule.forRoot(process.env.MONGO_URL!),
-    MongooseModule.forFeature([
-      { name: Blog.name, schema: BlogSchema },
-      { name: Post.name, schema: PostSchema },
-      { name: UserMongo.name, schema: UserSchema },
-      { name: Comment.name, schema: CommentSchema },
-      { name: CommentLikes.name, schema: CommentsLikesSchema },
-      { name: PostLikes.name, schema: PostLikesSchema },
-      { name: SessionDb.name, schema: SessionSchema },
-    ]),
     JwtModule.register({
       global: true,
       secret: process.env.JWT_SECRET,
