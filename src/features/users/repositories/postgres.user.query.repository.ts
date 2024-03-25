@@ -1,11 +1,31 @@
 import { Injectable } from '@nestjs/common';
-import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
+import { DataSource, Repository } from 'typeorm';
 
 import { QueryPaginationResult } from '../../../infrastructure/types/query-sort.type';
 import { PaginationWithItems } from '../../common/types/output';
+import { User_Orm } from '../entites/orm_user';
 import { User } from '../entites/user';
 import { UserOutputType } from '../types/output';
+
+@Injectable()
+export class ORMUserQueryRepository {
+  constructor(@InjectRepository(User_Orm) protected userRepository: Repository<User_Orm>) {}
+  async getUserById(userId: number): Promise<UserOutputType | null> {
+    const user = await this.userRepository.findOneBy({ id: userId });
+    if (!user) return null;
+    return this.userMapping(user);
+  }
+
+  private userMapping(user: User_Orm): UserOutputType {
+    return {
+      id: user.id.toString(),
+      login: user.login,
+      email: user.email,
+      createdAt: user.createdAt.toISOString(),
+    };
+  }
+}
 
 @Injectable()
 export class PostgresUserQueryRepository {

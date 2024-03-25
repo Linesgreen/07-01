@@ -25,6 +25,7 @@ import { TestingController } from './features/testing/controllers/testing.contro
 import { userProviders } from './features/users';
 import { SaUserController } from './features/users/controllers/sa.user.controller';
 import { User_Orm } from './features/users/entites/orm_user';
+import { UserOrmRepository } from './features/users/repositories/postgres.user.repository';
 import { QueryPaginationPipe } from './infrastructure/decorators/transform/query-pagination.pipe';
 import { ConfCodeIsValidConstraint } from './infrastructure/decorators/validate/conf-code.decorator';
 import { EmailIsConformedConstraint } from './infrastructure/decorators/validate/email-is-conformed.decorator';
@@ -98,6 +99,7 @@ const decorators = [
     ...strategies,
     ...decorators,
     QueryPaginationPipe,
+    UserOrmRepository,
   ],
 })
 export class AppModule implements NestModule {

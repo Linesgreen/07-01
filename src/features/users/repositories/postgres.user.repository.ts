@@ -2,16 +2,39 @@
 // noinspection UnnecessaryLocalVariableJS
 
 import { Injectable } from '@nestjs/common';
-import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
+import { DataSource, Repository } from 'typeorm';
 
 import { AbstractRepository } from '../../../infrastructure/repositories/abstract.repository';
+import { User_Orm } from '../entites/orm_user';
 import { User } from '../entites/user';
+import { UserOrmType, UserToDB } from '../types/db';
 import { UserPgDb } from '../types/output';
+@Injectable()
+export class UserOrmRepository {
+  constructor(@InjectRepository(User_Orm) protected userRepository: Repository<User_Orm>) {}
+  async createUser(user: User): Promise<{ id: number }> {
+    const entity: UserToDB = {
+      login: user.accountData.login,
+      email: user.accountData.email,
+      passwordHash: user.accountData.passwordHash,
+      confirmationCode: user.emailConfirmation.confirmationCode,
+      expirationDate: user.emailConfirmation.expirationDate,
+      createdAt: user.accountData.createdAt,
+      isConfirmed: user.emailConfirmation.isConfirmed,
+    };
+    const newUser: UserOrmType = await this.userRepository.save(entity);
+    console.log(newUser);
+    return { id: newUser.id };
+  }
+}
 
 @Injectable()
 export class PostgresUserRepository extends AbstractRepository<UserPgDb> {
-  constructor(@InjectDataSource() protected dataSource: DataSource) {
+  constructor(
+    @InjectDataSource() protected dataSource: DataSource,
+    protected userOrmRepository: UserOrmRepository,
+  ) {
     super(dataSource);
   }
   /**
@@ -34,6 +57,10 @@ export class PostgresUserRepository extends AbstractRepository<UserPgDb> {
     const userInDb = await this.add('users', entity);
     // Присваиваем новому пользователю идентификатор, возвращенный из базы данных
     newUser.id = userInDb[0].id;
+
+    const result = await this.userOrmRepository.createUser(newUser);
+    console.log(result);
+
     return newUser;
   }
 

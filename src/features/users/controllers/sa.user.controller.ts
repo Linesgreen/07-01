@@ -20,9 +20,9 @@ export class SaUserController {
   @Post('')
   @HttpCode(201)
   async createUser(@Body() userCreateData: UserCreateModel): Promise<UserOutputType> {
-    const result = await this.userService.createUserToDto(userCreateData);
+    const result = await this.userService.addUserORM(userCreateData);
     if (result.isFailure()) ErrorResulter.proccesError(result);
-    return result.value;
+    return result.value as UserOutputType;
   }
   @Get('')
   async getAllUsers(

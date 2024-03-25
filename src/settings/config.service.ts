@@ -1,10 +1,14 @@
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { config } from 'dotenv';
-config();
+
+// Определяем среду выполнения
+const environment = process.env.NODE_ENV || 'development';
+// Загружаем соответствующий файл .env
+config({ path: `.env.${environment}` });
+
 class ConfigService {
   constructor(private env: { [k: string]: string | undefined }) {}
 
-  //TODO понять нафига
   public ensureValues(keys: string[]): ConfigService {
     keys.forEach((k) => this.getValue(k));
     return this;
@@ -15,8 +19,8 @@ class ConfigService {
   }
 
   public isProduction(): boolean {
-    const mode = this.getValue('MODE');
-    return mode != 'DEV';
+    const mode = environment;
+    return mode === 'production';
   }
 
   public getTypeOrmConfig(): TypeOrmModuleOptions {
@@ -27,26 +31,28 @@ class ConfigService {
       username: this.getValue('POSTGRES_USER'),
       password: this.getValue('POSTGRES_PASSWORD'),
       database: this.getValue('POSTGRES_DATABASE'),
-      autoLoadEntities: true,
-      synchronize: true,
+      autoLoadEntities: !this.isProduction(),
+      synchronize: !this.isProduction(),
+      ssl: this.isProduction(),
     };
   }
+
   public getGmailUser(): string {
-    const user = this.getValue('GMAIL_USER');
-    return user;
+    return this.getValue('GMAIL_USER');
   }
+
   public getGmailPass(): string {
-    const pass = this.getValue('GMAIL_PASS');
-    return pass;
+    return this.getValue('GMAIL_PASS');
   }
+
   public getTokenExp(): string {
-    const tokenExp = this.getValue('TOKEN_EXP');
-    return tokenExp;
+    return this.getValue('TOKEN_EXP');
   }
+
   public getRefreshTokenExp(): string {
-    const refreshTokenExp = this.getValue('REFRESH_TOKEN_EXP');
-    return refreshTokenExp;
+    return this.getValue('REFRESH_TOKEN_EXP');
   }
+
   private getValue(key: string): string {
     const value = this.env[key];
     if (!value) {

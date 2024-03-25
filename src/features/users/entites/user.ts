@@ -11,7 +11,7 @@ export class AccountData {
   login: string;
   email: string;
   passwordHash: string;
-  createdAt: string;
+  createdAt: Date;
 }
 
 export class EmailConfirmation {
@@ -30,7 +30,7 @@ export class User {
       login: userData.login,
       email: userData.email,
       passwordHash: passwordHash,
-      createdAt: new Date().toISOString(),
+      createdAt: new Date(),
     };
     this.emailConfirmation = {
       confirmationCode: crypto.randomUUID(),
@@ -64,7 +64,7 @@ export class User {
       id: this.id.toString(),
       login: this.accountData.login,
       email: this.accountData.email,
-      createdAt: this.accountData.createdAt,
+      createdAt: this.accountData.createdAt.toISOString(),
     };
   }
   updateConfirmationCode(): void {
