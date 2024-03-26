@@ -26,7 +26,7 @@ export class QueryPaginationPipe implements PipeTransform<QueryPaginationType, P
       searchEmailTerm: object?.searchEmailTerm ?? null,
       searchNameTerm: object?.searchNameTerm ?? null,
       sortBy: object?.sortBy ?? 'createdAt',
-      sortDirection: object?.sortDirection === 'asc' ? 'asc' : 'desc',
+      sortDirection: object?.sortDirection === ('asc' || 'ASC') ? 'ASC' : 'DESC',
       pageNumber: object?.pageNumber ? object?.pageNumber : 1,
       pageSize: object?.pageSize ? object?.pageSize : 10,
     };

@@ -46,13 +46,14 @@ export class UserService {
     return null;
   }
 
-  async deleteUser(userId: string): Promise<Result<string>> {
-    const userIsExist = await this.postgresUsersRepository.chekUserIsExistByUserId(userId);
+  async deleteUser(userId: number): Promise<Result<string>> {
+    const userIsExist = await this.userOrmRepository.checkIsExitsById(userId);
     if (!userIsExist) return Result.Err(ErrorStatus.NOT_FOUND, `User ${userId} not found`);
     //Деактивируем все сессии пользователя
-    await this.sessionService.terminateAllSession(userId);
+    //TODO переделать на typeORM
+    await this.sessionService.terminateAllSession(userId.toString());
     //Отмечаем пользователя как удаленного
-    await this.postgresUsersRepository.deleteById(userId);
+    await this.userOrmRepository.deleteById(userId);
     return Result.Ok(`User ${userId} deleted`);
   }
 }

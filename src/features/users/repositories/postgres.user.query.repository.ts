@@ -11,10 +11,35 @@ import { UserOutputType } from '../types/output';
 @Injectable()
 export class ORMUserQueryRepository {
   constructor(@InjectRepository(User_Orm) protected userRepository: Repository<User_Orm>) {}
+
   async getUserById(userId: number): Promise<UserOutputType | null> {
     const user = await this.userRepository.findOneBy({ id: userId });
     if (!user) return null;
     return this.userMapping(user);
+  }
+
+  async getAll(sortData: QueryPaginationResult): Promise<PaginationWithItems<UserOutputType>> {
+    const skip = (sortData.pageNumber - 1) * sortData.pageSize;
+
+    const users = await this.userRepository
+      .createQueryBuilder('user')
+      .where({ isActive: true })
+      .orderBy(`user.${sortData.sortBy}`, `${sortData.sortDirection}`)
+      .take(sortData.pageSize)
+      .skip(skip)
+      .getMany();
+
+    const totalCount = await this.userRepository.createQueryBuilder('user').getCount();
+
+    const usersDto: UserOutputType[] = users.map((user) => this.userMapping(user));
+
+    const usersOutput: PaginationWithItems<UserOutputType> = new PaginationWithItems(
+      sortData.pageNumber,
+      sortData.pageSize,
+      totalCount,
+      usersDto,
+    );
+    return usersOutput;
   }
 
   private userMapping(user: User_Orm): UserOutputType {
@@ -40,29 +65,6 @@ export class PostgresUserQueryRepository {
     );
     if (user.length === 0) return null;
     return User.fromDbToInstance(user[0]).toDto();
-  }
-
-  async getAll(sortData: QueryPaginationResult): Promise<PaginationWithItems<UserOutputType>> {
-    const serachLoginTerm = sortData.searchLoginTerm ?? '';
-    const searchEmailTerm = sortData.searchEmailTerm ?? '';
-
-    const isText = await this.isTextColumn('users', sortData.sortBy);
-    const sortByType = isText ? `LOWER("${sortData.sortBy}")` : `"${sortData.sortBy}"`;
-    const users = await this.dataSource.query(
-      `SELECT id, login, email, "passwordHash", "confirmationCode", "expirationDate","createdAt", "isConfirmed"
-       FROM public.users
-       WHERE (login ILIKE '%${serachLoginTerm}%' OR email ILIKE '%${searchEmailTerm}%') AND "active" = true
-       ORDER BY "${sortData.sortBy}" ${sortData.sortDirection}
-       LIMIT ${sortData.pageSize} OFFSET ${(sortData.pageNumber - 1) * sortData.pageSize}
-      `,
-    );
-
-    const allDtoUsers: UserOutputType[] = users.map((user) => User.fromDbToInstance(user).toDto());
-    const totalCount = await this.dataSource.query(`
-      SELECT COUNT(id) FROM public.users WHERE (login ILIKE '%${serachLoginTerm}%' OR email ILIKE '%${searchEmailTerm}%') AND "active" = true
-    `);
-
-    return new PaginationWithItems(+sortData.pageNumber, +sortData.pageSize, Number(totalCount[0].count), allDtoUsers);
   }
 
   private async isTextColumn(tableName: string, columnName: string): Promise<boolean> {

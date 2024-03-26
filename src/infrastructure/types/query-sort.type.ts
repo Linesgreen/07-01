@@ -19,8 +19,8 @@ export class QueryPaginationType {
   sortBy?: string;
 
   @IsOptional()
-  @IsIn(['asc', 'desc'])
-  sortDirection?: 'asc' | 'desc';
+  @IsIn(['asc', 'desc', 'ASC', 'DESC'])
+  sortDirection?: 'asc' | 'desc' | 'ASC' | 'DESC';
 
   @IsOptional()
   @Transform((value: TransformFnParams) => parseInt(value.value, 10))
@@ -38,7 +38,7 @@ export class QueryPaginationResult {
   searchEmailTerm: string | null;
   searchNameTerm: string | null;
   sortBy: string;
-  sortDirection: 'asc' | 'desc';
+  sortDirection: 'ASC' | 'DESC';
   pageNumber: number;
   pageSize: number;
 }

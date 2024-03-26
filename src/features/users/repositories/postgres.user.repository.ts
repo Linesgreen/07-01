@@ -27,6 +27,15 @@ export class UserOrmRepository {
     console.log(newUser);
     return { id: newUser.id };
   }
+
+  async deleteById(id: number): Promise<void> {
+    await this.userRepository.update({ id }, { isActive: false });
+  }
+
+  async checkIsExitsById(id: number): Promise<boolean> {
+    const user = await this.userRepository.count({ where: { id } });
+    return !!user;
+  }
 }
 
 @Injectable()
