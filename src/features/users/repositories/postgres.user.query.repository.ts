@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, ILike, Repository } from 'typeorm';
 
 import { QueryPaginationResult } from '../../../infrastructure/types/query-sort.type';
 import { PaginationWithItems } from '../../common/types/output';
@@ -20,16 +20,26 @@ export class ORMUserQueryRepository {
 
   async getAll(sortData: QueryPaginationResult): Promise<PaginationWithItems<UserOutputType>> {
     const skip = (sortData.pageNumber - 1) * sortData.pageSize;
-
+    const serachLoginTerm = sortData.searchLoginTerm ?? '';
+    const searchEmailTerm = sortData.searchEmailTerm ?? '';
     const users = await this.userRepository
       .createQueryBuilder('user')
-      .where({ isActive: true })
+      .where([
+        { isActive: true, login: ILike(`%${serachLoginTerm}%`) },
+        { isActive: true, email: ILike(`%${searchEmailTerm}%`) },
+      ])
       .orderBy(`user.${sortData.sortBy}`, `${sortData.sortDirection}`)
       .take(sortData.pageSize)
       .skip(skip)
       .getMany();
 
-    const totalCount = await this.userRepository.createQueryBuilder('user').getCount();
+    const totalCount = await this.userRepository
+      .createQueryBuilder('user')
+      .where([
+        { isActive: true, login: ILike(`%${serachLoginTerm}%`) },
+        { isActive: true, email: ILike(`%${searchEmailTerm}%`) },
+      ])
+      .getCount();
 
     const usersDto: UserOutputType[] = users.map((user) => this.userMapping(user));
 

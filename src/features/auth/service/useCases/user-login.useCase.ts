@@ -25,7 +25,8 @@ export class UserLoginUseCase implements ICommandHandler<UserLoginCommand> {
     const { userId, ip, userAgent } = command;
     const tokenKey = crypto.randomUUID();
     const deviceId = crypto.randomUUID();
-    await this.createSession({ userId, deviceId, ip, userAgent, tokenKey });
+    //TODO переписать на typeorm
+    //await this.createSession({ userId, deviceId, ip, userAgent, tokenKey });
     const { token, refreshToken } = await this.authService.generateTokenPair(userId.toString(), tokenKey, deviceId);
     return Result.Ok({ token, refreshToken });
   }

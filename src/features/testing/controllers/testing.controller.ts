@@ -1,13 +1,19 @@
 import { Controller, Delete, HttpCode } from '@nestjs/common';
-import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
+import { DataSource, Repository } from 'typeorm';
+
+import { User_Orm } from '../../users/entites/orm_user';
 
 @Controller('testing')
 export class TestingController {
-  constructor(@InjectDataSource() private dataSource: DataSource) {}
+  constructor(
+    @InjectDataSource() private dataSource: DataSource,
+    @InjectRepository(User_Orm) protected userRepository: Repository<User_Orm>,
+  ) {}
   @Delete('/all-data')
   @HttpCode(204)
   async clearBd(): Promise<void> {
+    await this.userRepository.delete({});
     await this.dataSource.query(`DELETE  FROM public.sessions CASCADE`);
     await this.dataSource.query(`DELETE  FROM public.post_likes CASCADE`);
     await this.dataSource.query(`DELETE  FROM public.comments_likes CASCADE`);

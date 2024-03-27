@@ -32,9 +32,25 @@ export class UserOrmRepository {
     await this.userRepository.update({ id }, { isActive: false });
   }
 
+  async getById(id: number): Promise<User | null> {
+    const user = await this.userRepository.findOne({ where: { id } });
+    if (!user) return null;
+    return this.userFromDbToUser(user);
+  }
+
+  async getByLoginOrEmail(loginOrEmail: string): Promise<User | null> {
+    const user = await this.userRepository.findOne({ where: [{ email: loginOrEmail }, { login: loginOrEmail }] });
+    if (!user) return null;
+    return this.userFromDbToUser(user);
+  }
+
   async checkIsExitsById(id: number): Promise<boolean> {
     const user = await this.userRepository.count({ where: { id } });
     return !!user;
+  }
+
+  private userFromDbToUser(user: UserOrmType): User {
+    return User.fromDbToInstance(user);
   }
 }
 

@@ -1,8 +1,9 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { config } from 'dotenv';
 
 // Определяем среду выполнения
-const environment = process.env.NODE_ENV || 'development';
+const environment = 'development'; //process.env.NODE_ENV || 'development';
 // Загружаем соответствующий файл .env
 config({ path: `.env.${environment}` });
 
@@ -20,6 +21,7 @@ class ConfigService {
 
   public isProduction(): boolean {
     const mode = environment;
+    // @ts-ignore
     return mode === 'production';
   }
 
