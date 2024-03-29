@@ -3,7 +3,7 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 
 import { Result } from '../../../../infrastructure/object-result/objcet-result';
 import { Session } from '../../../security/entites/session';
-import { PostgresSessionRepository } from '../../../security/repository/session.postgres.repository';
+import { SessionOrmRepository } from '../../../security/repository/session.postgres.repository';
 import { AuthService } from '../auth.service';
 
 export class UserLoginCommand {
@@ -17,7 +17,7 @@ export class UserLoginCommand {
 @CommandHandler(UserLoginCommand)
 export class UserLoginUseCase implements ICommandHandler<UserLoginCommand> {
   constructor(
-    protected postgresSessionRepository: PostgresSessionRepository,
+    protected postgresSessionRepository: SessionOrmRepository,
     protected authService: AuthService,
   ) {}
 
@@ -25,8 +25,7 @@ export class UserLoginUseCase implements ICommandHandler<UserLoginCommand> {
     const { userId, ip, userAgent } = command;
     const tokenKey = crypto.randomUUID();
     const deviceId = crypto.randomUUID();
-    //TODO переписать на typeorm
-    //await this.createSession({ userId, deviceId, ip, userAgent, tokenKey });
+    await this.createSession({ userId, deviceId, ip, userAgent, tokenKey });
     const { token, refreshToken } = await this.authService.generateTokenPair(userId.toString(), tokenKey, deviceId);
     return Result.Ok({ token, refreshToken });
   }
@@ -40,6 +39,6 @@ export class UserLoginUseCase implements ICommandHandler<UserLoginCommand> {
   }): Promise<void> {
     const { userId, deviceId, ip, userAgent, tokenKey } = sessionData;
     const session = new Session(tokenKey, deviceId, userAgent, userId, ip);
-    await this.postgresSessionRepository.addSession(session);
+    await this.postgresSessionRepository.createSession(session);
   }
 }

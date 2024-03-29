@@ -2,7 +2,7 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 
 import { ErrorStatus, Result } from '../../../../infrastructure/object-result/objcet-result';
 import { MailService } from '../../../../mail/mail.service';
-import { PostgresUserRepository } from '../../../users/repositories/postgres.user.repository';
+import { UserOrmRepository } from '../../../users/repositories/postgres.user.repository';
 import { AuthService } from '../auth.service';
 
 export class NewPasswordRequestCommand {
@@ -13,7 +13,7 @@ export class NewPasswordRequestCommand {
 export class NewPasswordRequestUseCase implements ICommandHandler<NewPasswordRequestCommand> {
   constructor(
     protected mailService: MailService,
-    protected postgreeUserRepository: PostgresUserRepository,
+    protected userRepository: UserOrmRepository,
     protected authService: AuthService,
   ) {}
 
@@ -27,7 +27,7 @@ export class NewPasswordRequestUseCase implements ICommandHandler<NewPasswordReq
   }
 
   private async chekUserIsExist(email: string): Promise<boolean> {
-    const result = await this.postgreeUserRepository.chekUserIsExistByLoginOrEmail(email);
+    const result = await this.userRepository.getByLoginOrEmail(email);
     if (!result) {
       console.warn('User with email ' + email + ' not found');
       return false;

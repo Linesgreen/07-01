@@ -4,6 +4,7 @@ import process from 'process';
 
 import { SessionOutputType } from '../../auth/types/output';
 import { SessionPgDb } from '../types/output';
+import { Session_Orm } from './orm_session';
 
 export class Session {
   id: number;
@@ -27,9 +28,10 @@ export class Session {
     this.deviceId = deviceId;
   }
 
-  static fromDbToInstance(sessionDb: SessionPgDb): Session {
+  //TODO убрать лишний deviceID или Id
+  static fromDbToInstance(sessionDb: SessionPgDb | Session_Orm): Session {
     const newSession = Object.create(Session.prototype);
-    newSession.id = sessionDb.id;
+    newSession.id = sessionDb.deviceId;
     newSession.tokenKey = sessionDb.tokenKey;
     newSession.issuedDate = sessionDb.issuedDate;
     newSession.expiredDate = sessionDb.expiredDate;

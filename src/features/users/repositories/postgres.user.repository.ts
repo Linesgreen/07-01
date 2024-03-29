@@ -24,7 +24,6 @@ export class UserOrmRepository {
       isConfirmed: user.emailConfirmation.isConfirmed,
     };
     const newUser: UserOrmType = await this.userRepository.save(entity);
-    console.log(newUser);
     return { id: newUser.id };
   }
 
@@ -39,7 +38,15 @@ export class UserOrmRepository {
   }
 
   async getByLoginOrEmail(loginOrEmail: string): Promise<User | null> {
+    console.log('123123123');
     const user = await this.userRepository.findOne({ where: [{ email: loginOrEmail }, { login: loginOrEmail }] });
+
+    if (!user) return null;
+    return this.userFromDbToUser(user);
+  }
+
+  async findByConfirmationCode(code: string): Promise<User | null> {
+    const user = await this.userRepository.findOne({ where: { confirmationCode: code } });
     if (!user) return null;
     return this.userFromDbToUser(user);
   }
@@ -47,6 +54,20 @@ export class UserOrmRepository {
   async checkIsExitsById(id: number): Promise<boolean> {
     const user = await this.userRepository.count({ where: { id } });
     return !!user;
+  }
+
+  async updateUserInfo(user: User): Promise<void> {
+    const entity: UserToDB = {
+      login: user.accountData.login,
+      email: user.accountData.email,
+      passwordHash: user.accountData.passwordHash,
+      confirmationCode: user.emailConfirmation.confirmationCode,
+      expirationDate: user.emailConfirmation.expirationDate,
+      createdAt: user.accountData.createdAt,
+      isConfirmed: user.emailConfirmation.isConfirmed,
+    };
+    if (!user.id) throw new Error('hernya');
+    await this.userRepository.update({ id: user.id }, entity);
   }
 
   private userFromDbToUser(user: UserOrmType): User {

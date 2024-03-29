@@ -1,7 +1,7 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 
 import { Result } from '../../../../infrastructure/object-result/objcet-result';
-import { PostgresUserRepository } from '../../../users/repositories/postgres.user.repository';
+import { UserOrmRepository } from '../../../users/repositories/postgres.user.repository';
 
 export class ChangeUserConfirmationCommand {
   constructor(
@@ -10,16 +10,19 @@ export class ChangeUserConfirmationCommand {
   ) {}
 }
 
+//TODO разобраться с error
 @CommandHandler(ChangeUserConfirmationCommand)
 export class ChangeUserConfirmationUseCase implements ICommandHandler<ChangeUserConfirmationCommand> {
-  constructor(protected postgreeUserRepository: PostgresUserRepository) {}
+  constructor(protected postgreeUserRepository: UserOrmRepository) {}
 
   async execute(command: ChangeUserConfirmationCommand): Promise<Result<string>> {
     const { confCode, confirmationStatus } = command;
-
-    await this.postgreeUserRepository.updateUserFields('confirmationCode', confCode, {
-      isConfirmed: confirmationStatus,
-    });
+    const user = await this.postgreeUserRepository.findByConfirmationCode(confCode);
+    if (!user) {
+      throw new Error('user not found');
+    }
+    user.updateConfirmationStatus(confirmationStatus);
+    await this.postgreeUserRepository.updateUserInfo(user);
     return Result.Ok('user confirmed successfully');
   }
 }

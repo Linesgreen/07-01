@@ -2,7 +2,7 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 
 import { ErrorStatus, Result } from '../../../../infrastructure/object-result/objcet-result';
 import { Session } from '../../../security/entites/session';
-import { PostgresSessionRepository } from '../../../security/repository/session.postgres.repository';
+import { SessionOrmRepository } from '../../../security/repository/session.postgres.repository';
 import { AuthService } from '../auth.service';
 
 export class RefreshTokenCommand {
@@ -15,7 +15,7 @@ export class RefreshTokenCommand {
 @CommandHandler(RefreshTokenCommand)
 export class RefreshTokenUseCase implements ICommandHandler<RefreshTokenCommand> {
   constructor(
-    protected postgresSessionRepository: PostgresSessionRepository,
+    protected sessionRepository: SessionOrmRepository,
     protected authService: AuthService,
   ) {}
 
@@ -34,19 +34,15 @@ export class RefreshTokenUseCase implements ICommandHandler<RefreshTokenCommand>
   }
 
   async findSession(userId: string, tokenKey: string): Promise<Session | null> {
-    const session = await this.postgresSessionRepository.getByUserIdAndTokenKey(Number(userId), tokenKey);
+    const session = await this.sessionRepository.getByUserIdAndTokenKey(Number(userId), tokenKey);
 
-    if (!session) null;
-    //throw new NotFoundException('Session not found');
+    if (!session) return null;
 
     return session;
   }
 
   async updateAndSaveSession(session: Session, newTokenKey: string): Promise<void> {
     session.updateSession(newTokenKey);
-
-    const { id, issuedDate, expiredDate, tokenKey } = session;
-
-    await this.postgresSessionRepository.updateSessionFields('id', id, { issuedDate, tokenKey, expiredDate });
+    await this.sessionRepository.updateSession(session);
   }
 }

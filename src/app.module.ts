@@ -51,13 +51,13 @@ const decorators = [
   BlogIsExistConstraint,
   RecoveryCodeIsValidConstraint,
 ];
-
+//TODo на фор рут асин
 @Module({
   imports: [
     ThrottlerModule.forRoot([
       {
         ttl: 10000,
-        limit: 10000,
+        limit: 5,
       },
     ]),
     ConfigModule.forRoot({ isGlobal: true }),

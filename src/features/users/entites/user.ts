@@ -20,6 +20,7 @@ export class EmailConfirmation {
   isConfirmed: boolean;
 }
 
+//TODO удалить null в id
 export class User {
   accountData: AccountData;
   emailConfirmation: EmailConfirmation;
@@ -70,5 +71,8 @@ export class User {
   updateConfirmationCode(): void {
     this.emailConfirmation.confirmationCode = crypto.randomUUID();
     this.emailConfirmation.expirationDate = add(new Date(), { hours: 1 });
+  }
+  updateConfirmationStatus(status: boolean): void {
+    this.emailConfirmation.isConfirmed = status;
   }
 }

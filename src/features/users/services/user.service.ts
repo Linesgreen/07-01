@@ -34,8 +34,7 @@ export class UserService {
     const userIsExist = await this.userOrmRepository.checkIsExitsById(userId);
     if (!userIsExist) return Result.Err(ErrorStatus.NOT_FOUND, `User ${userId} not found`);
     //Деактивируем все сессии пользователя
-    //TODO переделать на typeORM
-    await this.sessionService.terminateAllSession(userId.toString());
+    await this.sessionService.terminateAllSession(userId);
     //Отмечаем пользователя как удаленного
     await this.userOrmRepository.deleteById(userId);
     return Result.Ok(`User ${userId} deleted`);

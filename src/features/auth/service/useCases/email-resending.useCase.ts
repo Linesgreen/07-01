@@ -3,7 +3,7 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { ErrorStatus, Result } from '../../../../infrastructure/object-result/objcet-result';
 import { MailService } from '../../../../mail/mail.service';
 import { User } from '../../../users/entites/user';
-import { PostgresUserRepository } from '../../../users/repositories/postgres.user.repository';
+import { UserOrmRepository } from '../../../users/repositories/postgres.user.repository';
 
 export class EmailResendingCommand {
   constructor(public email: string) {}
@@ -13,7 +13,7 @@ export class EmailResendingCommand {
 export class EmailResendingUseCase implements ICommandHandler<EmailResendingCommand> {
   constructor(
     protected mailService: MailService,
-    protected postgresUserRepository: PostgresUserRepository,
+    protected postgresUserRepository: UserOrmRepository,
   ) {}
 
   async execute({ email }: EmailResendingCommand): Promise<Result<string>> {
@@ -23,30 +23,18 @@ export class EmailResendingUseCase implements ICommandHandler<EmailResendingComm
     targetUser.updateConfirmationCode();
 
     // Получаем информацию для обновления полей
-    const { confirmationCode, expirationDate, login } = this.getUpdateFieldsInfo(targetUser);
+    const { confirmationCode, login } = this.getUpdateFieldsInfo(targetUser);
 
     // Обновляем поле и отправляем письмо с подтверждением
-    await this.updateFields(email, confirmationCode, expirationDate);
+    await this.postgresUserRepository.updateUserInfo(targetUser);
     await this.mailService.sendUserConfirmation(email, login, confirmationCode);
     return Result.Ok('email sended');
   }
 
   // Метод для получения информации для обновления полей
-  private getUpdateFieldsInfo(targetUser: User): { confirmationCode: string; expirationDate: string; login: string } {
+  private getUpdateFieldsInfo(targetUser: User): { confirmationCode: string; login: string } {
     const confirmationCode = targetUser.emailConfirmation.confirmationCode;
-    const expirationDate = targetUser.emailConfirmation.expirationDate.toISOString();
     const login = targetUser.accountData.login;
-
-    return { confirmationCode, expirationDate, login };
-  }
-
-  // Метод для обновления полей пользователя
-  private async updateFields(email: string, confirmationCode: string, expirationDate: string): Promise<void> {
-    const fieldToUpdate = {
-      confirmationCode,
-      expirationDate,
-    };
-
-    await this.postgresUserRepository.updateUserFields('email', email, fieldToUpdate);
+    return { confirmationCode, login };
   }
 }

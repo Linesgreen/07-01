@@ -5,15 +5,13 @@ import { ErrorResulter } from '../../../infrastructure/object-result/objcet-resu
 import { CurrentSession } from '../../auth/decorators/userId-sessionKey.decorator';
 import { SessionOutputType } from '../../auth/types/output';
 import { SessionOwnerGuard } from '../guards/session-owner.guard';
-import { SessionPostgresQueryRepository } from '../repository/session.postgres.query.repository';
-import { PostgresSessionRepository } from '../repository/session.postgres.repository';
+import { SessionOrmQueryRepository } from '../repository/session.postgres.query.repository';
 import { SessionService } from '../service/session.service';
 
 @Controller('security')
 export class SecurityController {
   constructor(
-    private sessionPostgresQueryRepository: SessionPostgresQueryRepository,
-    private postgresSessionRepository: PostgresSessionRepository,
+    private sessionQueryRepository: SessionOrmQueryRepository,
     private sessionService: SessionService,
   ) {}
 
@@ -21,9 +19,9 @@ export class SecurityController {
   @Get('devices')
   @HttpCode(200)
   async getSessions(
-    @CurrentSession() { userId }: { userId: string; tokenKey: string },
+    @CurrentSession() { userId }: { userId: number; tokenKey: string },
   ): Promise<SessionOutputType[] | null> {
-    const sessions = await this.sessionPostgresQueryRepository.getUserSessions(Number(userId));
+    const sessions = await this.sessionQueryRepository.getSessionsByUserId(userId);
     if (!sessions) throw new NotFoundException();
     return sessions;
   }
@@ -32,10 +30,10 @@ export class SecurityController {
   @Delete('devices/:id')
   @HttpCode(204)
   async terminateCurrentSession(
-    @CurrentSession() { userId }: { userId: string; tokenKey: string },
+    @CurrentSession() { userId }: { userId: number; tokenKey: string },
     @Param('id') deviceId: string,
   ): Promise<void> {
-    const result = await this.sessionService.terminateSessionByDeviceIdAndUserId(deviceId, Number(userId));
+    const result = await this.sessionService.terminateSessionByDeviceIdAndUserId(deviceId, userId);
     if (result.isFailure()) ErrorResulter.proccesError(result);
   }
 
@@ -43,7 +41,7 @@ export class SecurityController {
   @Delete('devices')
   @HttpCode(204)
   async terminateOtherSession(
-    @CurrentSession() { userId, tokenKey }: { userId: string; tokenKey: string },
+    @CurrentSession() { userId, tokenKey }: { userId: number; tokenKey: string },
   ): Promise<void> {
     const result = await this.sessionService.terminateOtherSession(userId, tokenKey);
     if (result.isFailure()) ErrorResulter.proccesError(result);

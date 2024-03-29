@@ -1,4 +1,4 @@
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 import { User_Orm } from '../../users/entites/orm_user';
 
@@ -31,5 +31,6 @@ export class Session_Orm {
   isActive: boolean;
 
   @ManyToOne(() => User_Orm, (u) => u.sessions)
+  @JoinColumn({ name: 'userId' })
   user: User_Orm;
 }

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars,@typescript-eslint/ban-types,@typescript-eslint/no-explicit-any */
 // noinspection PointlessBooleanExpressionJS
 
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import {
   registerDecorator,
   ValidationArguments,
@@ -10,10 +10,7 @@ import {
   ValidatorConstraintInterface,
 } from 'class-validator';
 
-import {
-  PostgresUserRepository,
-  UserOrmRepository,
-} from '../../../features/users/repositories/postgres.user.repository';
+import { UserOrmRepository } from '../../../features/users/repositories/postgres.user.repository';
 
 export function NameIsExist(property?: string, validationOptions?: ValidationOptions) {
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
@@ -32,11 +29,13 @@ export function NameIsExist(property?: string, validationOptions?: ValidationOpt
 @ValidatorConstraint({ name: 'NameIsExist', async: false })
 @Injectable()
 export class NameIsExistConstraint implements ValidatorConstraintInterface {
-  constructor(@Inject(PostgresUserRepository) private readonly postgreeUserRepository: UserOrmRepository) {}
+  constructor(protected postgreeUserRepository: UserOrmRepository) {}
 
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   async validate(value: any, args: ValidationArguments) {
-    return !!!(await this.postgreeUserRepository.getByLoginOrEmail(value));
+    const user = await this.postgreeUserRepository.getByLoginOrEmail(value);
+    if (user) return false;
+    return true;
   }
 
   defaultMessage(validationArguments?: ValidationArguments): string {

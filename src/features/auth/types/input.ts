@@ -1,6 +1,6 @@
 // noinspection RegExpRedundantEscape
 
-import { IsEmail, IsString, Length, Matches } from 'class-validator';
+import { IsEmail, IsString, IsUUID, Length, Matches } from 'class-validator';
 
 import { Trim } from '../../../infrastructure/decorators/transform/trim';
 import { ConfCodeIsValid } from '../../../infrastructure/decorators/validate/conf-code.decorator';
@@ -29,6 +29,7 @@ export class UserRegistrationModel {
 export class ValidationCodeModel {
   @Trim()
   @ConfCodeIsValid()
+  @IsUUID()
   code: string;
 }
 

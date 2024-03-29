@@ -99,7 +99,7 @@ export class AuthController {
   // Метод для получения информации о текущем пользователе
   @Get('me')
   @UseGuards(JwtAuthGuard)
-  async getUserInformation(@CurrentUser() userId: string): Promise<AboutMeType> {
+  async getUserInformation(@CurrentUser() userId: number): Promise<AboutMeType> {
     const result = await this.commandBus.execute(new UserGetInformationAboutMeCommand(userId));
     if (result.isFailure()) ErrorResulter.proccesError(result);
     return result.value;
@@ -126,7 +126,7 @@ export class AuthController {
   @UseGuards(CookieJwtGuard)
   @Post('logout')
   @HttpCode(204)
-  async logout(@CurrentSession() { userId, tokenKey }: { userId: string; tokenKey: string }): Promise<void> {
+  async logout(@CurrentSession() { userId, tokenKey }: { userId: number; tokenKey: string }): Promise<void> {
     const result = await this.sessionService.terminateCurrentSession(userId, tokenKey);
     if (result.isFailure()) ErrorResulter.proccesError(result);
   }
