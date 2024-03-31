@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   HttpCode,
+  HttpException,
   NotFoundException,
   Param,
   ParseIntPipe,
@@ -23,8 +24,7 @@ import { PaginationWithItems } from '../../common/types/output';
 import { PostService } from '../../posts/services/post.service';
 import { PostInBlogUpdateType } from '../../posts/types/input';
 import { OutputPostType } from '../../posts/types/output';
-import { PostgresBlogsQueryRepository } from '../repositories/postgres.blogs.query.repository';
-import { PostgresBlogsRepository } from '../repositories/postgres.blogs.repository';
+import { BlogsOrmQueryRepository } from '../repositories/postgres.blogs.query.repository';
 import { BlogsService } from '../services/blogs.service';
 import { GetPostForBlogCommand } from '../services/useCase/get-posts-for-blog.useCase';
 import { BlogCreateModel, PostToBlogCreateModel } from '../types/input';
@@ -34,10 +34,9 @@ import { OutputBlogType } from '../types/output';
 @Controller('/sa/blogs')
 export class SaBlogsController {
   constructor(
-    protected readonly postgresBlogsRepository: PostgresBlogsRepository,
+    protected readonly blogQueryRepository: BlogsOrmQueryRepository,
     protected readonly blogsService: BlogsService,
     protected readonly postService: PostService,
-    protected readonly postgresBlogsQueryRepository: PostgresBlogsQueryRepository,
     protected readonly commandBus: CommandBus,
   ) {}
 
@@ -45,12 +44,12 @@ export class SaBlogsController {
   async getAllBlogs(
     @Query(QueryPaginationPipe) queryData: QueryPaginationResult,
   ): Promise<PaginationWithItems<OutputBlogType>> {
-    return this.postgresBlogsQueryRepository.getAll(queryData);
+    return this.blogQueryRepository.getAll(queryData);
   }
 
   @Get(':id')
   async getBlog(@Param('id', ParseIntPipe) id: number): Promise<OutputBlogType> {
-    const targetBlog = await this.postgresBlogsQueryRepository.getBlogById(id);
+    const targetBlog = await this.blogQueryRepository.getById(id);
     if (!targetBlog) throw new NotFoundException('Blog Not Found');
     return targetBlog;
   }
@@ -69,7 +68,10 @@ export class SaBlogsController {
   @Post('')
   async createBlog(@Body() blogCreateData: BlogCreateModel): Promise<OutputBlogType> {
     const result = await this.blogsService.createBlog(blogCreateData);
-    return result.value;
+    const blogId = result.value.id;
+    const blog = await this.blogQueryRepository.getById(blogId);
+    if (!blog) throw new HttpException('Blog create error', 500);
+    return blog;
   }
 
   @Post(':blogId/posts')

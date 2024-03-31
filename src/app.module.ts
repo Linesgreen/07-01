@@ -15,6 +15,7 @@ import { blogsProviders, blogsUseCases } from './features/blogs';
 import { BlogsController } from './features/blogs/controllers/blogs.controller';
 import { SaBlogsController } from './features/blogs/controllers/sa.blogs.controller';
 import { BlogIsExistConstraint } from './features/blogs/decorators/blog-is-exist.decorator';
+import { Blogs_Orm } from './features/blogs/entites/orm_blogs';
 import { commentProviders, commentUseCases } from './features/comments';
 import { CommentsController } from './features/comments/controller/comments.controller';
 import { postProviders, postsUseCases } from './features/posts';
@@ -63,7 +64,7 @@ const decorators = [
     ConfigModule.forRoot({ isGlobal: true }),
     //Регистрируем для работы в postgres
     TypeOrmModule.forRoot(configService.getTypeOrmConfig()),
-    TypeOrmModule.forFeature([User_Orm, Session_Orm]),
+    TypeOrmModule.forFeature([User_Orm, Session_Orm, Blogs_Orm]),
     //Регистрируем для испльзования Passport strategy
     PassportModule,
     //Регистрируем для испльзования @CommandHandler
