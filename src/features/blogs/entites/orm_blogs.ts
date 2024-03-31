@@ -1,10 +1,11 @@
 /* eslint-disable @typescript-eslint/no-this-alias */
-import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { BaseEntity, Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
+import { Post_Orm } from '../../posts/entites/orm_post';
 import { BlogCreateModel } from '../types/input';
 
 @Entity({ name: 'blogs_orm' })
-export class Blogs_Orm extends BaseEntity {
+export class Blog_Orm extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -26,8 +27,11 @@ export class Blogs_Orm extends BaseEntity {
   @Column()
   isActive: boolean;
 
-  static createBlogModel(blogData: BlogCreateModel): Blogs_Orm {
-    const blog = new Blogs_Orm();
+  @OneToMany(() => Post_Orm, (p) => p.blog)
+  posts: Post_Orm[];
+
+  static createBlogModel(blogData: BlogCreateModel): Blog_Orm {
+    const blog = new Blog_Orm();
     blog.createdAt = new Date();
     blog.name = blogData.name;
     blog.description = blogData.description;

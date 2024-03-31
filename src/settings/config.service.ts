@@ -35,6 +35,7 @@ class ConfigService {
       database: this.getValue('POSTGRES_DATABASE'),
       autoLoadEntities: !this.isProduction(),
       synchronize: !this.isProduction(),
+      logging: true,
       ssl: this.isProduction(),
     };
   }

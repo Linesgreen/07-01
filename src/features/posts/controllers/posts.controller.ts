@@ -22,7 +22,7 @@ import { CreateCommentCommand } from '../../comments/service/useCase/create-comm
 import { LikeCreateModel } from '../../comments/types/comments/input';
 import { OutputCommentType } from '../../comments/types/comments/output';
 import { PaginationWithItems } from '../../common/types/output';
-import { PostgresPostQueryRepository } from '../repositories/post/postgres.post.query.repository';
+import { PostOrmQueryRepository } from '../repositories/post/postgres.post.query.repository';
 import { AddLikeToPostCommand } from '../services/useCase/add-like.to.post.useSace';
 import { GetCommentsToPostWithLikeStatusCommand } from '../services/useCase/get-comments-for-post-use.case';
 import { CommentCreateModel } from '../types/input';
@@ -32,7 +32,7 @@ import { OutputPostType } from '../types/output';
 export class PostsController {
   constructor(
     private commandBus: CommandBus,
-    protected postgresPostQueryRepository: PostgresPostQueryRepository,
+    protected postQueryRepository: PostOrmQueryRepository,
   ) {}
 
   @Get('/')
@@ -40,7 +40,7 @@ export class PostsController {
     @CurrentUser() userId: number | null,
     @Query(QueryPaginationPipe) queryData: QueryPaginationResult,
   ): Promise<PaginationWithItems<OutputPostType>> {
-    const post = await this.postgresPostQueryRepository.getPosts(queryData, userId);
+    const post = await this.postQueryRepository.getPosts(queryData, userId);
     if (!post?.items?.length) throw new NotFoundException(`Posts  not found`);
 
     return post;
@@ -51,7 +51,7 @@ export class PostsController {
     @CurrentUser() userId: number | null,
     @Param('postId', ParseIntPipe) postId: number,
   ): Promise<OutputPostType> {
-    const post = await this.postgresPostQueryRepository.getPostById(postId, userId);
+    const post = await this.postQueryRepository.getPostById(postId, userId);
     if (!post) throw new NotFoundException(`Post with id: ${postId} not found`);
 
     return post;

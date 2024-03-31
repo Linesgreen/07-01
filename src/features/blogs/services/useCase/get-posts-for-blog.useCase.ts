@@ -6,9 +6,9 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { ErrorStatus, Result } from '../../../../infrastructure/object-result/objcet-result';
 import { QueryPaginationResult } from '../../../../infrastructure/types/query-sort.type';
 import { PaginationWithItems } from '../../../common/types/output';
-import { PostgresPostQueryRepository } from '../../../posts/repositories/post/postgres.post.query.repository';
+import { PostOrmQueryRepository } from '../../../posts/repositories/post/postgres.post.query.repository';
 import { OutputPostType } from '../../../posts/types/output';
-import { PostgresBlogsRepository } from '../../repositories/postgres.blogs.repository';
+import { BlogsOrmRepository } from '../../repositories/postgres.blogs.repository';
 
 export class GetPostForBlogCommand {
   constructor(
@@ -21,8 +21,8 @@ export class GetPostForBlogCommand {
 @CommandHandler(GetPostForBlogCommand)
 export class GetPostForBlogUseCase implements ICommandHandler<GetPostForBlogCommand> {
   constructor(
-    protected postgresPostQueryRepository: PostgresPostQueryRepository,
-    protected postgresBlogsRepository: PostgresBlogsRepository,
+    protected postQueryRepository: PostOrmQueryRepository,
+    protected blogRepository: BlogsOrmRepository,
   ) {}
 
   async execute(command: GetPostForBlogCommand): Promise<Result<string | PaginationWithItems<OutputPostType>>> {
@@ -31,17 +31,18 @@ export class GetPostForBlogUseCase implements ICommandHandler<GetPostForBlogComm
     await this.checkBlogExist(blogId);
 
     const posts = await this.findPostsForBlog(blogId, sortData, userId);
+    await this.postQueryRepository.getPostsForBlog(sortData, userId, blogId);
     if (!posts) return Result.Err(ErrorStatus.NOT_FOUND, 'Posts not found');
     return Result.Ok(posts);
   }
 
   private async checkBlogExist(blogId: number) {
-    const post = await this.postgresBlogsRepository.chekBlogIsExist(blogId);
+    const post = await this.blogRepository.getById(blogId);
     if (!post) throw new NotFoundException(`Blog ${blogId} not found`);
   }
 
   private async findPostsForBlog(blogId: number, sortData: QueryPaginationResult, userId: number | null) {
-    const posts = await this.postgresPostQueryRepository.getPosts(sortData, userId, blogId);
+    const posts = await this.postQueryRepository.getPostsForBlog(sortData, userId, blogId);
     if (!posts?.items?.length) {
       return null;
     }

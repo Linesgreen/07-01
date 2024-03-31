@@ -15,11 +15,12 @@ import { blogsProviders, blogsUseCases } from './features/blogs';
 import { BlogsController } from './features/blogs/controllers/blogs.controller';
 import { SaBlogsController } from './features/blogs/controllers/sa.blogs.controller';
 import { BlogIsExistConstraint } from './features/blogs/decorators/blog-is-exist.decorator';
-import { Blogs_Orm } from './features/blogs/entites/orm_blogs';
+import { Blog_Orm } from './features/blogs/entites/orm_blogs';
 import { commentProviders, commentUseCases } from './features/comments';
 import { CommentsController } from './features/comments/controller/comments.controller';
 import { postProviders, postsUseCases } from './features/posts';
 import { PostsController } from './features/posts/controllers/posts.controller';
+import { Post_Orm } from './features/posts/entites/orm_post';
 import { SecurityController } from './features/security/controllers/security.controller';
 import { Session_Orm } from './features/security/entites/orm_session';
 import { TestingController } from './features/testing/controllers/testing.controller';
@@ -58,13 +59,13 @@ const decorators = [
     ThrottlerModule.forRoot([
       {
         ttl: 10000,
-        limit: 5,
+        limit: 5000,
       },
     ]),
     ConfigModule.forRoot({ isGlobal: true }),
     //Регистрируем для работы в postgres
     TypeOrmModule.forRoot(configService.getTypeOrmConfig()),
-    TypeOrmModule.forFeature([User_Orm, Session_Orm, Blogs_Orm]),
+    TypeOrmModule.forFeature([User_Orm, Session_Orm, Blog_Orm, Post_Orm]),
     //Регистрируем для испльзования Passport strategy
     PassportModule,
     //Регистрируем для испльзования @CommandHandler

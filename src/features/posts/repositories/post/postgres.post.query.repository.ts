@@ -1,13 +1,138 @@
-// noinspection ES6ShorthandObjectProperty
+/* eslint-disable no-underscore-dangle */
+// noinspection ES6ShorthandObjectProperty,JSUnusedLocalSymbols
 
 import { Injectable } from '@nestjs/common';
-import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
+import { DataSource, Repository } from 'typeorm';
 
 import { AbstractRepository } from '../../../../infrastructure/repositories/abstract.repository';
 import { QueryPaginationResult } from '../../../../infrastructure/types/query-sort.type';
 import { PaginationWithItems } from '../../../common/types/output';
+import { Post_Orm } from '../../entites/orm_post';
 import { OutputPostType, PostPgWithBlogDataDb } from '../../types/output';
+
+@Injectable()
+export class PostOrmQueryRepository {
+  constructor(@InjectRepository(Post_Orm) protected postRepository: Repository<Post_Orm>) {}
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async getPostById(id: number, userId: number | null): Promise<OutputPostType | null> {
+    const postWithBlogName = await this.postRepository
+      .createQueryBuilder('post')
+      .leftJoin('post.blog', 'blog') // Используем leftJoin для присоединения таблицы блогов без автоматического выбора
+      .select([
+        'post.id',
+        'post.title',
+        'post.shortDescription',
+        'post.content',
+        'post.createdAt',
+        'post.isActive',
+        'post.blogId',
+        'blog.name', // Явно указываем, что нам нужно только имя блога
+      ])
+      .where('post.id = :id', { id }) // Условие для фильтрации поста по ID
+      .andWhere('post.isActive = true') // Убедимся, что пост активен
+      .getOne(); // Получаем один результат
+    if (!postWithBlogName) return null;
+    return this._mapToOutputPostType(postWithBlogName);
+  }
+
+  async getPostsForBlog(
+    sortData: QueryPaginationResult,
+    userId: number | null,
+    blogId: number,
+  ): Promise<PaginationWithItems<OutputPostType> | null> {
+    const skip = (sortData.pageNumber - 1) * sortData.pageSize;
+
+    const postsWithBlogName = await this.postRepository
+      .createQueryBuilder('post')
+      // Используем leftJoin для присоединения таблицы блогов без автоматического выбора
+      .leftJoin('post.blog', 'blog')
+      .select([
+        'post.id',
+        'post.title',
+        'post.shortDescription',
+        'post.content',
+        'post.createdAt',
+        'post.isActive',
+        'post.blogId',
+        'blog.name', // Явно указываем, что нам нужно только имя блога
+      ])
+      .where('blog.id = :id', { id: blogId })
+      .andWhere('post.isActive = true') // Убедимся, что пост активен
+      //.orderBy('post' + `."${sortData.sortBy}"`, `${sortData.sortDirection}`)
+      .orderBy({ [`post.${sortData.sortBy}`]: sortData.sortDirection })
+      .take(sortData.pageSize)
+      .skip(skip)
+      .getMany();
+    if (!postsWithBlogName.length) return null;
+
+    const totalCount = await this.postRepository.createQueryBuilder().where({ isActive: true }).getCount();
+    const postDto = postsWithBlogName.map((p) => this._mapToOutputPostType(p));
+    return new PaginationWithItems(sortData.pageNumber, sortData.pageSize, totalCount, postDto);
+  }
+
+  async getPosts(
+    sortData: QueryPaginationResult,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    userId: number | null,
+  ): Promise<PaginationWithItems<OutputPostType> | null> {
+    //TODO узнать про эту шнягу
+    let orderCriteria;
+    if (sortData.sortBy === 'blogName') {
+      // Для сортировки по имени блога используем алиас таблицы 'blog' и поле 'name'
+      orderCriteria = { 'blog.name': sortData.sortDirection };
+    } else {
+      // Для всех остальных случаев сортировки используем поля таблицы 'post'
+      orderCriteria = { [`post.${sortData.sortBy}`]: sortData.sortDirection };
+    }
+
+    const skip = (sortData.pageNumber - 1) * sortData.pageSize;
+
+    const postsWithBlogName = await this.postRepository
+      .createQueryBuilder('post')
+      // Используем leftJoin для присоединения таблицы блогов без автоматического выбора
+      .leftJoin('post.blog', 'blog')
+      .select([
+        'post.id',
+        'post.title',
+        'post.shortDescription',
+        'post.content',
+        'post.createdAt',
+        'post.isActive',
+        'post.blogId',
+        'blog.name', // Явно указываем, что нам нужно только имя блога
+      ])
+      .where('post.isActive = true') // Убедимся, что пост активен
+      .orderBy(orderCriteria)
+      .take(sortData.pageSize)
+      .skip(skip)
+      .getMany();
+    if (!postsWithBlogName.length) return null;
+
+    const totalCount = await this.postRepository.createQueryBuilder().where({ isActive: true }).getCount();
+    const postDto = postsWithBlogName.map((p) => this._mapToOutputPostType(p));
+    return new PaginationWithItems(sortData.pageNumber, sortData.pageSize, totalCount, postDto);
+  }
+
+  private _mapToOutputPostType(post: Post_Orm): OutputPostType {
+    return {
+      id: post.id.toString(),
+      title: post.title,
+      shortDescription: post.shortDescription,
+      content: post.content,
+      blogId: post.blogId.toString(),
+      blogName: post.blog.name,
+      createdAt: post.createdAt.toISOString(),
+      extendedLikesInfo: {
+        likesCount: 0,
+        dislikesCount: 0,
+        myStatus: 'None',
+        newestLikes: [],
+      },
+    };
+  }
+}
 
 @Injectable()
 export class PostgresPostQueryRepository extends AbstractRepository<PostPgWithBlogDataDb> {

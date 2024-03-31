@@ -7,12 +7,12 @@ import { AbstractRepository } from '../../../infrastructure/repositories/abstrac
 import { QueryPaginationResult } from '../../../infrastructure/types/query-sort.type';
 import { PaginationWithItems } from '../../common/types/output';
 import { BlogPG } from '../entites/blogPG';
-import { Blogs_Orm } from '../entites/orm_blogs';
+import { Blog_Orm } from '../entites/orm_blogs';
 import { BlogPgDb, OutputBlogType } from '../types/output';
 
 @Injectable()
 export class BlogsOrmQueryRepository {
-  constructor(@InjectRepository(Blogs_Orm) protected blogRepository: Repository<Blogs_Orm>) {}
+  constructor(@InjectRepository(Blog_Orm) protected blogRepository: Repository<Blog_Orm>) {}
   async getById(id: number): Promise<OutputBlogType | null> {
     const blog = await this.blogRepository.findOne({ where: { id, isActive: true } });
     return blog ? this._mapToOutputBlogType(blog) : null;
@@ -38,7 +38,7 @@ export class BlogsOrmQueryRepository {
     return new PaginationWithItems(sortData.pageNumber, sortData.pageSize, totalCount, blogDto);
   }
 
-  private _mapToOutputBlogType(blog: Blogs_Orm): OutputBlogType {
+  private _mapToOutputBlogType(blog: Blog_Orm): OutputBlogType {
     return {
       id: blog.id.toString(),
       name: blog.name,

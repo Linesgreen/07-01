@@ -21,12 +21,12 @@ import { ErrorResulter } from '../../../infrastructure/object-result/objcet-resu
 import { QueryPaginationResult } from '../../../infrastructure/types/query-sort.type';
 import { CurrentUser } from '../../auth/decorators/current-user.decorator';
 import { PaginationWithItems } from '../../common/types/output';
+import { PostOrmQueryRepository } from '../../posts/repositories/post/postgres.post.query.repository';
 import { PostService } from '../../posts/services/post.service';
 import { PostInBlogUpdateType } from '../../posts/types/input';
 import { OutputPostType } from '../../posts/types/output';
 import { BlogsOrmQueryRepository } from '../repositories/postgres.blogs.query.repository';
 import { BlogsService } from '../services/blogs.service';
-import { GetPostForBlogCommand } from '../services/useCase/get-posts-for-blog.useCase';
 import { BlogCreateModel, PostToBlogCreateModel } from '../types/input';
 import { OutputBlogType } from '../types/output';
 
@@ -36,6 +36,7 @@ export class SaBlogsController {
   constructor(
     protected readonly blogQueryRepository: BlogsOrmQueryRepository,
     protected readonly blogsService: BlogsService,
+    protected readonly postQueryRepository: PostOrmQueryRepository,
     protected readonly postService: PostService,
     protected readonly commandBus: CommandBus,
   ) {}
@@ -60,9 +61,11 @@ export class SaBlogsController {
     @Query(QueryPaginationPipe) queryData: QueryPaginationResult,
     @Param('blogId', ParseIntPipe) blogId: number,
   ): Promise<PaginationWithItems<OutputPostType>> {
-    const result = await this.commandBus.execute(new GetPostForBlogCommand(userId, blogId, queryData));
-    if (result.isFailure()) throw new NotFoundException('Posts Not Found');
-    return result.value;
+    const blog = await this.blogQueryRepository.getById(blogId);
+    if (!blog) throw new NotFoundException('Blog Not Found');
+    const post = await this.postQueryRepository.getPostsForBlog(queryData, userId, blogId);
+    if (!post?.items?.length) throw new NotFoundException('Posts Not Found');
+    return post;
   }
 
   @Post('')
@@ -82,7 +85,10 @@ export class SaBlogsController {
   ): Promise<OutputPostType> {
     const result = await this.postService.createPost({ ...postData, blogId });
     if (result.isFailure()) ErrorResulter.proccesError(result);
-    return result.value as OutputPostType;
+    const { id: postId } = result.value as { id: number };
+    const post = await this.postQueryRepository.getPostById(postId, null);
+    if (!post) throw new HttpException('Post create error', 500);
+    return post;
   }
 
   @Put(':id')
@@ -112,6 +118,7 @@ export class SaBlogsController {
     const result = await this.blogsService.deleteBlog(id);
     if (result.isFailure()) ErrorResulter.proccesError(result);
   }
+
   @Delete(':blogId/posts/:postId')
   @HttpCode(204)
   async deletePostForBlog(

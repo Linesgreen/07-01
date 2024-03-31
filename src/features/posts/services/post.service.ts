@@ -1,50 +1,50 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import { Injectable } from '@nestjs/common';
 
 import { ErrorStatus, Result } from '../../../infrastructure/object-result/objcet-result';
-import { PostgresBlogsRepository } from '../../blogs/repositories/postgres.blogs.repository';
-import { PostCreateModel, PostPg } from '../entites/post';
-import { PostgresPostQueryRepository } from '../repositories/post/postgres.post.query.repository';
-import { PostgresPostRepository } from '../repositories/post/postgres.post.repository';
+import { BlogsOrmRepository } from '../../blogs/repositories/postgres.blogs.repository';
+import { Post_Orm } from '../entites/orm_post';
+import { PostCreateModel } from '../entites/post';
+import { PostOrmRepository } from '../repositories/post/postgres.post.repository';
 import { PostInBlogUpdateType } from '../types/input';
-import { OutputPostType } from '../types/output';
 
 @Injectable()
 export class PostService {
   constructor(
-    protected postgresBlogsRepository: PostgresBlogsRepository,
-    protected postgresPostRepository: PostgresPostRepository,
-    protected postgresPostQueryRepository: PostgresPostQueryRepository,
+    protected blogRepository: BlogsOrmRepository,
+    protected postRepository: PostOrmRepository,
   ) {}
-  async createPost(postData: PostCreateModel): Promise<Result<OutputPostType | string>> {
-    const targetBlog = await this.postgresBlogsRepository.chekBlogIsExist(Number(postData.blogId));
+  async createPost(postData: PostCreateModel): Promise<Result<{ id: number } | string>> {
+    const targetBlog = await this.blogRepository.getById(Number(postData.blogId));
     if (!targetBlog) return Result.Err(ErrorStatus.NOT_FOUND, 'Blog Not Found');
 
-    const newPost = new PostPg(postData);
+    const newPost = Post_Orm.createPostModel(postData);
 
-    const postId: string = await this.postgresPostRepository.addPost(newPost);
-    const targetPost = await this.postgresPostQueryRepository.getPostById(Number(postId));
-    if (!targetPost) return Result.Err(ErrorStatus.NOT_FOUND, 'Post Not Found');
+    const { id: postId } = await this.postRepository.addPost(newPost);
 
-    return Result.Ok(targetPost);
+    return Result.Ok({ id: postId });
   }
 
   async updatePost(params: PostInBlogUpdateType, postId: number, blogId: number): Promise<Result<string>> {
-    const postIsExist = await this.postgresPostRepository.chekPostIsExist(postId);
-    if (!postIsExist) return Result.Err(ErrorStatus.NOT_FOUND, 'Post Not Found');
+    const post = await this.postRepository.getPostById(postId);
+    if (!post) return Result.Err(ErrorStatus.NOT_FOUND, 'Post Not Found');
 
-    const blogIsExist = await this.postgresBlogsRepository.chekBlogIsExist(blogId);
+    const blogIsExist = await this.blogRepository.getById(blogId);
     if (!blogIsExist) return Result.Err(ErrorStatus.NOT_FOUND, 'Blog Not Found');
 
-    await this.postgresPostRepository.updatePost(postId, params);
+    // @ts-ignore
+    post.update(params);
+    await this.postRepository.save(post);
     return Result.Ok('Post updated');
   }
   async deletePost(postId: number, blogId: number): Promise<Result<string>> {
-    const blogIsExist = await this.postgresBlogsRepository.chekBlogIsExist(blogId);
-    if (!blogIsExist) return Result.Err(ErrorStatus.NOT_FOUND, `Blog ${blogId} Not Found`);
+    const blog = await this.blogRepository.getById(blogId);
+    if (!blog) return Result.Err(ErrorStatus.NOT_FOUND, `Blog ${blogId} Not Found`);
 
-    const postIsExist = await this.postgresPostRepository.chekPostIsExist(postId);
-    if (!postIsExist) return Result.Err(ErrorStatus.NOT_FOUND, `Post ${postId} Not Found`);
-    await this.postgresPostRepository.deleteById(postId);
+    const post = await this.postRepository.getPostById(postId);
+    if (!post) return Result.Err(ErrorStatus.NOT_FOUND, `Post ${postId} Not Found`);
+
+    await this.postRepository.deleteById(postId);
     return Result.Ok('Post deleted');
   }
 }
