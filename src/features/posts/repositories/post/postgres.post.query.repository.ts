@@ -67,7 +67,7 @@ export class PostOrmQueryRepository {
       .getMany();
     if (!postsWithBlogName.length) return null;
 
-    const totalCount = await this.postRepository.createQueryBuilder().where({ isActive: true }).getCount();
+    const totalCount = await this.postRepository.createQueryBuilder().where({ isActive: true, blogId }).getCount();
     const postDto = postsWithBlogName.map((p) => this._mapToOutputPostType(p));
     return new PaginationWithItems(sortData.pageNumber, sortData.pageSize, totalCount, postDto);
   }

@@ -1,6 +1,7 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 import { Blog_Orm } from '../../blogs/entites/orm_blogs';
+import { Comment_Orm } from '../../comments/entites/orm_comment';
 import { PostCreateModel } from './post';
 
 @Entity()
@@ -29,6 +30,9 @@ export class Post_Orm {
   @ManyToOne(() => Blog_Orm, (b) => b.posts)
   @JoinColumn({ name: 'blogId' })
   blog: Blog_Orm;
+
+  @OneToMany(() => Comment_Orm, (c) => c.post)
+  comments: Comment_Orm[];
 
   static createPostModel(postData: PostCreateModel): Post_Orm {
     const post = new Post_Orm();

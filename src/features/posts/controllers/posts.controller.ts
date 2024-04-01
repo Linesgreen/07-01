@@ -18,13 +18,13 @@ import { JwtAuthGuard } from '../../../infrastructure/guards/jwt-auth.guard';
 import { ErrorResulter } from '../../../infrastructure/object-result/objcet-result';
 import { QueryPaginationResult } from '../../../infrastructure/types/query-sort.type';
 import { CurrentUser } from '../../auth/decorators/current-user.decorator';
+import { CommentOrmQueryRepository } from '../../comments/repositories/comments/postgres.comments.query.repository';
 import { CreateCommentCommand } from '../../comments/service/useCase/create-comment.useCase';
 import { LikeCreateModel } from '../../comments/types/comments/input';
 import { OutputCommentType } from '../../comments/types/comments/output';
 import { PaginationWithItems } from '../../common/types/output';
 import { PostOrmQueryRepository } from '../repositories/post/postgres.post.query.repository';
 import { AddLikeToPostCommand } from '../services/useCase/add-like.to.post.useSace';
-import { GetCommentsToPostWithLikeStatusCommand } from '../services/useCase/get-comments-for-post-use.case';
 import { CommentCreateModel } from '../types/input';
 import { OutputPostType } from '../types/output';
 
@@ -33,6 +33,7 @@ export class PostsController {
   constructor(
     private commandBus: CommandBus,
     protected postQueryRepository: PostOrmQueryRepository,
+    protected commentQueryRepository: CommentOrmQueryRepository,
   ) {}
 
   @Get('/')
@@ -57,16 +58,18 @@ export class PostsController {
     return post;
   }
 
-  //TODO разобраться с null в userId
   @Get(':postId/comments')
   async getCommentsForPost(
     @CurrentUser() userId: number | null,
     @Param('postId', ParseIntPipe) postId: number,
     @Query(QueryPaginationPipe) queryData: QueryPaginationResult,
   ): Promise<PaginationWithItems<OutputCommentType>> {
-    const result = await this.commandBus.execute(new GetCommentsToPostWithLikeStatusCommand(userId, postId, queryData));
-    if (result.isFailure()) ErrorResulter.proccesError(result);
-    return result.value;
+    const post = await this.postQueryRepository.getPostById(postId, null);
+    if (!post) throw new NotFoundException(`Post with id: ${postId} not found`);
+
+    const comments = await this.commentQueryRepository.getCommentsToPosts(queryData, postId, userId);
+    if (!comments?.items?.length) throw new NotFoundException(`Comments not found`);
+    return comments;
   }
 
   @Put('/:postId/like-status')
@@ -91,6 +94,11 @@ export class PostsController {
   ): Promise<OutputCommentType> {
     const result = await this.commandBus.execute(new CreateCommentCommand(userId, postId, content));
     if (result.isFailure()) ErrorResulter.proccesError(result);
-    return result.value;
+
+    const { id: commentId } = result.value as { id: number };
+    const comment = await this.commentQueryRepository.findById(commentId, userId);
+
+    if (!comment) throw new NotFoundException(`Comment with id: ${commentId} not found`);
+    return comment;
   }
 }

@@ -1,11 +1,9 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 
 import { ErrorStatus, Result } from '../../../../infrastructure/object-result/objcet-result';
-import { PostgresPostRepository } from '../../../posts/repositories/post/postgres.post.repository';
-import { CommentToPgDB } from '../../entites/commentPG';
-import { PostgresCommentsQueryRepository } from '../../repositories/comments/postgres.comments.query.repository';
-import { PostgresCommentsRepository } from '../../repositories/comments/postgres.comments.repository';
-import { OutputCommentType } from '../../types/comments/output';
+import { PostOrmRepository } from '../../../posts/repositories/post/postgres.post.repository';
+import { Comment_Orm } from '../../entites/orm_comment';
+import { CommentOrmRepository } from '../../repositories/comments/postgres.comments.repository';
 
 export class CreateCommentCommand {
   constructor(
@@ -18,19 +16,16 @@ export class CreateCommentCommand {
 @CommandHandler(CreateCommentCommand)
 export class CreateCommentUseCase implements ICommandHandler<CreateCommentCommand> {
   constructor(
-    protected postgresCommentsRepository: PostgresCommentsRepository,
-    protected postgresQueryRepository: PostgresCommentsQueryRepository,
-    protected postgresPostsRepository: PostgresPostRepository,
+    protected commentRepository: CommentOrmRepository,
+    protected postRepository: PostOrmRepository,
   ) {}
-  async execute({ userId, postId, content }: CreateCommentCommand): Promise<Result<string | OutputCommentType>> {
-    const newCommentToDB = new CommentToPgDB({ userId, postId, content });
+  async execute({ userId, postId, content }: CreateCommentCommand): Promise<Result<string | { id: number }>> {
+    const newCommentToDB = Comment_Orm.createCommentModel({ userId, postId, content });
 
-    const targetPost = await this.postgresPostsRepository.chekPostIsExist(Number(postId));
+    const targetPost = await this.postRepository.getPostById(postId);
     if (!targetPost) return Result.Err(ErrorStatus.NOT_FOUND, `Post with id ${postId} not found`);
 
-    const commentId = await this.postgresCommentsRepository.addComment(newCommentToDB);
-    const comment = await this.postgresQueryRepository.getCommentById(commentId, null);
-    if (!comment) return Result.Err(ErrorStatus.NOT_FOUND, `Comment with id ${commentId} not found`);
-    return Result.Ok(comment);
+    const commentId = await this.commentRepository.addComment(newCommentToDB);
+    return Result.Ok(commentId);
   }
 }

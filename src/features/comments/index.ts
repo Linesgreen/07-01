@@ -1,5 +1,8 @@
-import { PostgresCommentsQueryRepository } from './repositories/comments/postgres.comments.query.repository';
-import { PostgresCommentsRepository } from './repositories/comments/postgres.comments.repository';
+import {
+  CommentOrmQueryRepository,
+  PostgresCommentsQueryRepository,
+} from './repositories/comments/postgres.comments.query.repository';
+import { CommentOrmRepository, PostgresCommentsRepository } from './repositories/comments/postgres.comments.repository';
 import { CommentsLikesRepository } from './repositories/likes/comments-likes.repository';
 import { CommentsLikesQueryRepository } from './repositories/likes/comments-likes-query.repository';
 import { AddLikeToCommentUseCase } from './service/useCase/add-like.useCase';
@@ -13,6 +16,8 @@ export const commentProviders = [
   CommentsLikesRepository,
   PostgresCommentsQueryRepository,
   PostgresCommentsRepository,
+  CommentOrmRepository,
+  CommentOrmQueryRepository,
 ];
 
 export const commentUseCases = [

@@ -1,5 +1,6 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
+import { Comment_Orm } from '../../comments/entites/orm_comment';
 import { Session_Orm } from '../../security/entites/orm_session';
 
 @Entity()
@@ -33,4 +34,7 @@ export class User_Orm {
 
   @OneToMany(() => Session_Orm, (s) => s.userId)
   sessions: Session_Orm[];
+
+  @OneToMany(() => Comment_Orm, (c) => c.userId)
+  comments: Comment_Orm[];
 }

@@ -1,7 +1,7 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 
 import { ErrorStatus, Result } from '../../../../infrastructure/object-result/objcet-result';
-import { PostgresCommentsRepository } from '../../repositories/comments/postgres.comments.repository';
+import { CommentOrmRepository } from '../../repositories/comments/postgres.comments.repository';
 
 export class UpdateCommentCommand {
   constructor(
@@ -12,12 +12,14 @@ export class UpdateCommentCommand {
 
 @CommandHandler(UpdateCommentCommand)
 export class UpdateCommentUseCase implements ICommandHandler<UpdateCommentCommand> {
-  constructor(protected commentsRepository: PostgresCommentsRepository) {}
+  constructor(protected commentsRepository: CommentOrmRepository) {}
 
   async execute({ commentId, content }: UpdateCommentCommand): Promise<Result<string>> {
-    const isExist = await this.commentsRepository.chekIsExist(commentId);
-    if (!isExist) return Result.Err(ErrorStatus.NOT_FOUND, `Comment with id ${commentId} not found`);
-    await this.commentsRepository.updateComment(commentId, content);
+    const comment = await this.commentsRepository.getById(commentId);
+    if (!comment) return Result.Err(ErrorStatus.NOT_FOUND, `Comment with id ${commentId} not found`);
+
+    comment.update({ content });
+    await this.commentsRepository.update(comment);
     return Result.Ok('Comment updated');
   }
 }

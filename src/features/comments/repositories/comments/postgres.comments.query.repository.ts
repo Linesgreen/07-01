@@ -1,14 +1,71 @@
+/* eslint-disable no-underscore-dangle */
 // noinspection ES6ShorthandObjectProperty
 
 import { Injectable } from '@nestjs/common';
-import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
+import { DataSource, Repository } from 'typeorm';
 
 import { AbstractRepository } from '../../../../infrastructure/repositories/abstract.repository';
 import { QueryPaginationResult } from '../../../../infrastructure/types/query-sort.type';
 import { PaginationWithItems } from '../../../common/types/output';
 import { PostPgWithBlogDataDb } from '../../../posts/types/output';
+import { Comment_Orm } from '../../entites/orm_comment';
 import { OutputCommentType } from '../../types/comments/output';
+
+@Injectable()
+export class CommentOrmQueryRepository {
+  constructor(@InjectRepository(Comment_Orm) protected commentRepository: Repository<Comment_Orm>) {}
+
+  async findById(id: number, userId: number | null): Promise<OutputCommentType | null> {
+    const comment = await this.commentRepository
+      .createQueryBuilder('comment')
+      .leftJoin('comment.user', 'user')
+      .select(['comment.id', 'comment.content', 'comment.createdAt', 'comment.userId', 'user.login'])
+      .where('comment.id = :id', { id })
+      .andWhere('comment.isActive = true')
+      .getOne();
+
+    console.log(comment);
+    if (!comment) return null;
+    return this._mapToOutputCommentType(comment);
+  }
+
+  async getCommentsToPosts(sortData: QueryPaginationResult, postId: number, userId: number | null) {
+    const skip = (sortData.pageNumber - 1) * sortData.pageSize;
+
+    const comments = await this.commentRepository
+      .createQueryBuilder('comment')
+      .leftJoin('comment.user', 'user')
+      .select(['comment.id', 'comment.content', 'comment.createdAt', 'comment.userId', 'user.login'])
+      .where('comment.postId = :postId', { postId })
+      .andWhere('comment.isActive = true')
+      .orderBy({ [`comment.${sortData.sortBy}`]: sortData.sortDirection })
+      .take(sortData.pageSize)
+      .skip(skip)
+      .getMany();
+    if (!comments.length) return null;
+    const totalCount = await this.commentRepository.createQueryBuilder().where({ isActive: true, postId }).getCount();
+    const commentsDto = comments.map((c) => this._mapToOutputCommentType(c));
+    return new PaginationWithItems(sortData.pageNumber, sortData.pageSize, totalCount, commentsDto);
+  }
+
+  private _mapToOutputCommentType(comment: Comment_Orm): OutputCommentType {
+    return {
+      id: comment.id.toString(),
+      content: comment.content,
+      createdAt: comment.createdAt.toISOString(),
+      commentatorInfo: {
+        userId: comment.userId.toString(),
+        userLogin: comment.user.login,
+      },
+      likesInfo: {
+        likesCount: 0,
+        dislikesCount: 0,
+        myStatus: 'None',
+      },
+    };
+  }
+}
 
 @Injectable()
 export class PostgresCommentsQueryRepository extends AbstractRepository<PostPgWithBlogDataDb> {
