@@ -1,4 +1,4 @@
-/* eslint-disable no-underscore-dangle */
+/* eslint-disable no-underscore-dangle,@typescript-eslint/no-explicit-any */
 // noinspection ES6ShorthandObjectProperty
 
 import { Injectable } from '@nestjs/common';
@@ -10,46 +10,94 @@ import { QueryPaginationResult } from '../../../../infrastructure/types/query-so
 import { PaginationWithItems } from '../../../common/types/output';
 import { PostPgWithBlogDataDb } from '../../../posts/types/output';
 import { Comment_Orm } from '../../entites/orm_comment';
+import { Comment_like_Orm } from '../../entites/orm_comment_like';
+import { LikeStatusE } from '../../types/comments/input';
 import { OutputCommentType } from '../../types/comments/output';
 
 @Injectable()
 export class CommentOrmQueryRepository {
-  constructor(@InjectRepository(Comment_Orm) protected commentRepository: Repository<Comment_Orm>) {}
+  constructor(
+    @InjectRepository(Comment_Orm) protected commentRepository: Repository<Comment_Orm>,
+    @InjectRepository(Comment_like_Orm) protected commentLikeRepository: Repository<Comment_like_Orm>,
+  ) {}
 
   async findById(id: number, userId: number | null): Promise<OutputCommentType | null> {
     const comment = await this.commentRepository
       .createQueryBuilder('comment')
       .leftJoin('comment.user', 'user')
-      .select(['comment.id', 'comment.content', 'comment.createdAt', 'comment.userId', 'user.login'])
-      .where('comment.id = :id', { id })
+      .leftJoin('comment.likes', 'likes', 'likes.userId = :userId', { userId: userId })
+      .select('likes.likeStatus')
+      .addSelect((qb) => {
+        return qb
+          .select('COUNT(comment_like.id)')
+          .from(Comment_like_Orm, 'comment_like')
+          .where('comment_like.commentId = comment.id')
+          .andWhere('comment_like.likeStatus = :likeStatus', { likeStatus: LikeStatusE.Like })
+          .groupBy('comment_like.commentId');
+      }, 'likes_likeCount')
+      .addSelect((qb1) => {
+        return qb1
+          .select('COUNT(id)')
+          .from(Comment_like_Orm, 'comment_like')
+          .where('comment_like.commentId = comment.id')
+          .andWhere('comment_like.likeStatus = :dislikeStatus', { dislikeStatus: LikeStatusE.Dislike })
+          .groupBy('comment_like.commentId');
+      }, 'likes_dislikeCount')
+      .addSelect(['comment.id', 'comment.content', 'comment.createdAt', 'comment.userId', 'user.login'])
+      .where('comment.id = :id', { id: id })
       .andWhere('comment.isActive = true')
-      .getOne();
-
+      .getRawAndEntities();
     console.log(comment);
-    if (!comment) return null;
-    return this._mapToOutputCommentType(comment);
+
+    if (!comment.entities.length) return null;
+    return this._mapToOutputCommentType(comment.entities[0], comment.raw[0]);
   }
 
-  async getCommentsToPosts(sortData: QueryPaginationResult, postId: number, userId: number | null) {
+  async getCommentsToPosts(
+    sortData: QueryPaginationResult,
+    postId: number,
+    userId: number | null,
+  ): Promise<PaginationWithItems<OutputCommentType> | null> {
     const skip = (sortData.pageNumber - 1) * sortData.pageSize;
 
     const comments = await this.commentRepository
       .createQueryBuilder('comment')
       .leftJoin('comment.user', 'user')
-      .select(['comment.id', 'comment.content', 'comment.createdAt', 'comment.userId', 'user.login'])
-      .where('comment.postId = :postId', { postId })
-      .andWhere('comment.isActive = true')
+      .leftJoin('comment.likes', 'likes', 'likes.userId = :userId', { userId: userId })
+      .select('likes.likeStatus')
+      .addSelect((qb) => {
+        return qb
+          .select('COUNT(comment_like.id)')
+          .from(Comment_like_Orm, 'comment_like')
+          .where('comment_like.commentId = comment.id')
+          .andWhere('comment_like.likeStatus = :likeStatus', { likeStatus: LikeStatusE.Like })
+          .groupBy('comment_like.commentId');
+      }, 'likes_likeCount')
+      .addSelect((qb1) => {
+        return qb1
+          .select('COUNT(id)')
+          .from(Comment_like_Orm, 'comment_like')
+          .where('comment_like.commentId = comment.id')
+          .andWhere('comment_like.likeStatus = :dislikeStatus', { dislikeStatus: LikeStatusE.Dislike })
+          .groupBy('comment_like.commentId');
+      }, 'likes_dislikeCount')
+      .addSelect(['comment.id', 'comment.content', 'comment.createdAt', 'comment.userId', 'user.login'])
+      .where('comment.isActive = true')
       .orderBy({ [`comment.${sortData.sortBy}`]: sortData.sortDirection })
       .take(sortData.pageSize)
       .skip(skip)
-      .getMany();
-    if (!comments.length) return null;
+      .getRawAndEntities();
+
+    if (!comments.entities.length) return null;
+
     const totalCount = await this.commentRepository.createQueryBuilder().where({ isActive: true, postId }).getCount();
-    const commentsDto = comments.map((c) => this._mapToOutputCommentType(c));
+
+    const commentsDto = comments.entities.map((c, index) => this._mapToOutputCommentType(c, comments.raw[index]));
     return new PaginationWithItems(sortData.pageNumber, sortData.pageSize, totalCount, commentsDto);
   }
 
-  private _mapToOutputCommentType(comment: Comment_Orm): OutputCommentType {
+  private _mapToOutputCommentType(comment: Comment_Orm, raw_comment?: any): OutputCommentType {
+    //Мапим лайки
     return {
       id: comment.id.toString(),
       content: comment.content,
@@ -59,9 +107,9 @@ export class CommentOrmQueryRepository {
         userLogin: comment.user.login,
       },
       likesInfo: {
-        likesCount: 0,
-        dislikesCount: 0,
-        myStatus: 'None',
+        likesCount: raw_comment?.likes_likeCount || 0,
+        dislikesCount: raw_comment?.likes_dislikeCount || 0,
+        myStatus: comment.likes ? comment.likes[0].likeStatus : 'None',
       },
     };
   }

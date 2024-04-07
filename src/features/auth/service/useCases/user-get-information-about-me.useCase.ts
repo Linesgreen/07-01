@@ -15,7 +15,7 @@ export class GetInformationAboutUserCase implements ICommandHandler<UserGetInfor
     const user = await this.UserRepository.getById(userId);
     if (!user) return Result.Err(ErrorStatus.NOT_FOUND, 'User not found');
     const { email, login } = user.accountData;
-    //TODO избваться от number
+
     const id = user.id!.toString();
     return Result.Ok({ email, login, userId: id });
   }

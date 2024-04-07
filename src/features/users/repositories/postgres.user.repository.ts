@@ -14,6 +14,8 @@ import { UserPgDb } from '../types/output';
 export class UserOrmRepository {
   constructor(@InjectRepository(User_Orm) protected userRepository: Repository<User_Orm>) {}
   async createUser(user: User): Promise<{ id: number }> {
+    //TODO Разбить
+    //TODO не стоит сохранять каскадно
     const entity: UserToDB = {
       login: user.accountData.login,
       email: user.accountData.email,

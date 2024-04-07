@@ -60,7 +60,6 @@ export class PostOrmQueryRepository {
       ])
       .where('blog.id = :id', { id: blogId })
       .andWhere('post.isActive = true') // Убедимся, что пост активен
-      //.orderBy('post' + `."${sortData.sortBy}"`, `${sortData.sortDirection}`)
       .orderBy({ [`post.${sortData.sortBy}`]: sortData.sortDirection })
       .take(sortData.pageSize)
       .skip(skip)
@@ -77,15 +76,10 @@ export class PostOrmQueryRepository {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     userId: number | null,
   ): Promise<PaginationWithItems<OutputPostType> | null> {
-    //TODO узнать про эту шнягу
-    let orderCriteria;
-    if (sortData.sortBy === 'blogName') {
-      // Для сортировки по имени блога используем алиас таблицы 'blog' и поле 'name'
-      orderCriteria = { 'blog.name': sortData.sortDirection };
-    } else {
-      // Для всех остальных случаев сортировки используем поля таблицы 'post'
-      orderCriteria = { [`post.${sortData.sortBy}`]: sortData.sortDirection };
-    }
+    //TODO через менеджер сделать нада
+
+    const orderField = sortData.sortBy === 'blogName' ? 'blog.name' : `post.${sortData.sortBy}`;
+    const orderCriteria = { [orderField]: sortData.sortDirection };
 
     const skip = (sortData.pageNumber - 1) * sortData.pageSize;
 
@@ -103,15 +97,17 @@ export class PostOrmQueryRepository {
         'post.blogId',
         'blog.name', // Явно указываем, что нам нужно только имя блога
       ])
+      .addSelect('blog.name', 'blogName')
       .where('post.isActive = true') // Убедимся, что пост активен
       .orderBy(orderCriteria)
       .take(sortData.pageSize)
       .skip(skip)
-      .getMany();
-    if (!postsWithBlogName.length) return null;
+      .getRawAndEntities();
+    console.log(postsWithBlogName);
+    if (!postsWithBlogName.entities.length) return null;
 
     const totalCount = await this.postRepository.createQueryBuilder().where({ isActive: true }).getCount();
-    const postDto = postsWithBlogName.map((p) => this._mapToOutputPostType(p));
+    const postDto = postsWithBlogName.entities.map((p) => this._mapToOutputPostType(p));
     return new PaginationWithItems(sortData.pageNumber, sortData.pageSize, totalCount, postDto);
   }
 

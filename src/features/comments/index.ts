@@ -4,7 +4,10 @@ import {
 } from './repositories/comments/postgres.comments.query.repository';
 import { CommentOrmRepository, PostgresCommentsRepository } from './repositories/comments/postgres.comments.repository';
 import { CommentsLikesRepository } from './repositories/likes/comments-likes.repository';
-import { CommentsLikesQueryRepository } from './repositories/likes/comments-likes-query.repository';
+import {
+  CommentOrmLikeRepository,
+  CommentsLikesQueryRepository,
+} from './repositories/likes/comments-likes-query.repository';
 import { AddLikeToCommentUseCase } from './service/useCase/add-like.useCase';
 import { CreateCommentUseCase } from './service/useCase/create-comment.useCase';
 import { DeleteCommentByIdUseCase } from './service/useCase/delte-comment-byId.useCase';
@@ -18,6 +21,7 @@ export const commentProviders = [
   PostgresCommentsRepository,
   CommentOrmRepository,
   CommentOrmQueryRepository,
+  CommentOrmLikeRepository,
 ];
 
 export const commentUseCases = [

@@ -18,6 +18,7 @@ export class UserService {
   async createUser(userData: UserCreateModel): Promise<Result<{ id: number }>> {
     const passwordHash = await bcrypt.hash(userData.password, 12);
     const newUser: User = new User(userData, passwordHash);
+
     const userId: { id: number } = await this.userOrmRepository.createUser(newUser);
     return Result.Ok(userId);
   }

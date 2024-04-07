@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   HttpCode,
+  HttpException,
   NotFoundException,
   Param,
   ParseIntPipe,
@@ -57,8 +58,9 @@ export class CommentsController {
   async addLike(
     @Param('commentId', ParseIntPipe) commentId: number,
     @Body() { likeStatus }: LikeCreateModel,
-    @CurrentUser(ParseIntPipe) userId: number,
+    @CurrentUser() userId: number | null,
   ): Promise<void> {
+    if (!userId) throw new HttpException('jwt valid, but user not found', 404);
     const result = await this.commandBus.execute(new AddLikeToCommentCommand(commentId, userId, likeStatus));
     if (result.isFailure()) ErrorResulter.proccesError(result);
   }

@@ -2,15 +2,12 @@ import { Injectable } from '@nestjs/common';
 
 import { ErrorStatus, Result } from '../../../infrastructure/object-result/objcet-result';
 import { Blog_Orm } from '../entites/orm_blogs';
-import { BlogsOrmRepository, PostgresBlogsRepository } from '../repositories/postgres.blogs.repository';
+import { BlogsOrmRepository } from '../repositories/postgres.blogs.repository';
 import { BlogCreateModel } from '../types/input';
-//TODO обсудирь
+
 @Injectable()
 export class BlogsService {
-  constructor(
-    protected postgresBlogsRepository: PostgresBlogsRepository,
-    protected blogRepository: BlogsOrmRepository,
-  ) {}
+  constructor(protected blogRepository: BlogsOrmRepository) {}
 
   async createBlog(blogData: BlogCreateModel): Promise<Result<{ id: number }>> {
     const newBlog = Blog_Orm.createBlogModel(blogData);

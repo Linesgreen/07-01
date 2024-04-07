@@ -1,10 +1,11 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 import { Blog_Orm } from '../../blogs/entites/orm_blogs';
 import { Post_Orm } from '../../posts/entites/orm_post';
 import { User_Orm } from '../../users/entites/orm_user';
 import { CommentUpdateModel } from '../types/comments/input';
 import { CommentCreateData } from './commentPG';
+import { Comment_like_Orm } from './orm_comment_like';
 
 @Entity()
 export class Comment_Orm {
@@ -33,6 +34,9 @@ export class Comment_Orm {
   @ManyToOne(() => User_Orm, (u) => u.comments)
   @JoinColumn({ name: 'userId' })
   user: User_Orm;
+
+  @OneToMany(() => Comment_like_Orm, (l) => l.comment)
+  likes: Comment_like_Orm[];
 
   static createCommentModel(postData: CommentCreateData): Comment_Orm {
     const comment = new Comment_Orm();

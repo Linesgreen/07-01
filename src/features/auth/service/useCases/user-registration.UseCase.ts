@@ -20,12 +20,16 @@ export class UserRegistrationUseCase implements ICommandHandler<UserRegistration
 
   async execute(command: UserRegistrationCommand): Promise<Result<string>> {
     const { email, login } = command.userData;
+
     const createResult = await this.userService.createUser(command.userData);
+
     const userId = createResult.value.id;
     const user = await this.userOrmRepository.getById(userId);
     if (!user) return Result.Err(ErrorStatus.SERVER_ERROR, 'User created but not found');
+
     const confirmationCode = user.emailConfirmation.confirmationCode;
     await this.mailService.sendUserConfirmation(email, login, confirmationCode);
+
     return Result.Ok('user registered successfully');
   }
 }

@@ -19,6 +19,7 @@ import { Blog_Orm } from './features/blogs/entites/orm_blogs';
 import { commentProviders, commentUseCases } from './features/comments';
 import { CommentsController } from './features/comments/controller/comments.controller';
 import { Comment_Orm } from './features/comments/entites/orm_comment';
+import { Comment_like_Orm } from './features/comments/entites/orm_comment_like';
 import { postProviders, postsUseCases } from './features/posts';
 import { PostsController } from './features/posts/controllers/posts.controller';
 import { Post_Orm } from './features/posts/entites/orm_post';
@@ -66,7 +67,7 @@ const decorators = [
     ConfigModule.forRoot({ isGlobal: true }),
     //Регистрируем для работы в postgres
     TypeOrmModule.forRoot(configService.getTypeOrmConfig()),
-    TypeOrmModule.forFeature([User_Orm, Session_Orm, Blog_Orm, Post_Orm, Comment_Orm]),
+    TypeOrmModule.forFeature([User_Orm, Session_Orm, Blog_Orm, Post_Orm, Comment_Orm, Comment_like_Orm]),
     //Регистрируем для испльзования Passport strategy
     PassportModule,
     //Регистрируем для испльзования @CommandHandler
@@ -115,6 +116,7 @@ export class AppModule implements NestModule {
         { path: 'posts/:postId/comments', method: RequestMethod.GET },
         { path: 'posts', method: RequestMethod.GET },
         { path: 'blogs/:blogId/posts', method: RequestMethod.GET },
+        { path: 'comments/:commentId', method: RequestMethod.GET },
       );
   }
 }

@@ -10,7 +10,6 @@ export class ChangeUserConfirmationCommand {
   ) {}
 }
 
-//TODO разобраться с error
 @CommandHandler(ChangeUserConfirmationCommand)
 export class ChangeUserConfirmationUseCase implements ICommandHandler<ChangeUserConfirmationCommand> {
   constructor(protected postgreeUserRepository: UserOrmRepository) {}
@@ -18,6 +17,7 @@ export class ChangeUserConfirmationUseCase implements ICommandHandler<ChangeUser
   async execute(command: ChangeUserConfirmationCommand): Promise<Result<string>> {
     const { confCode, confirmationStatus } = command;
     const user = await this.postgreeUserRepository.findByConfirmationCode(confCode);
+    //TODO сделать нормально!
     if (!user) {
       throw new Error('user not found');
     }

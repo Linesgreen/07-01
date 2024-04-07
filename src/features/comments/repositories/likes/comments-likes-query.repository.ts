@@ -1,10 +1,23 @@
 import { Injectable } from '@nestjs/common';
-import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
+import { DataSource, Repository } from 'typeorm';
 
 import { AbstractRepository } from '../../../../infrastructure/repositories/abstract.repository';
 import { PostLikeWithLoginFromDb } from '../../../posts/entites/like';
 import { CommentLike } from '../../entites/comment-like';
+import { Comment_like_Orm } from '../../entites/orm_comment_like';
+
+@Injectable()
+export class CommentOrmLikeRepository {
+  constructor(@InjectRepository(Comment_like_Orm) protected commentLikeRepository: Repository<Comment_like_Orm>) {}
+  async findLikeByUserId(commentId: number, userId: number): Promise<Comment_like_Orm | null> {
+    return this.commentLikeRepository.findOneBy({ commentId, userId });
+  }
+
+  async save(like: Comment_like_Orm): Promise<void> {
+    await this.commentLikeRepository.save(like);
+  }
+}
 
 @Injectable()
 export class CommentsLikesQueryRepository extends AbstractRepository<PostLikeWithLoginFromDb> {

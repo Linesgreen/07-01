@@ -9,7 +9,7 @@ import { AbstractRepository } from '../../../infrastructure/repositories/abstrac
 import { Session_Orm } from '../entites/orm_session';
 import { Session } from '../entites/session';
 import { SessionPgDb } from '../types/output';
-//TODO поговорить про эту движуху
+
 export class SessionOrmRepository {
   constructor(@InjectRepository(Session_Orm) protected sessionRepository: Repository<Session_Orm>) {}
   async createSession(session: Session): Promise<{ id: number }> {
@@ -18,10 +18,8 @@ export class SessionOrmRepository {
   }
 
   async getByUserIdAndTokenKey(userId: number, tokenKey: string): Promise<Session | null> {
-    console.log(userId);
-    console.log(tokenKey);
     const session = await this.sessionRepository.findOneBy([{ userId, tokenKey, isActive: true }]);
-    console.log('bebra', session);
+
     if (!session) return null;
     return Session.fromDbToInstance(session);
   }
@@ -31,7 +29,7 @@ export class SessionOrmRepository {
     if (!session) return null;
     return Session.fromDbToInstance(session);
   }
-
+  //TODO через метод класса
   async updateSession(session: Session): Promise<void> {
     const entity = {
       tokenKey: session.tokenKey,

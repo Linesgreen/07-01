@@ -1,4 +1,4 @@
-import { LikeStatusType } from '../../comments/types/comments/input';
+import { LikeStatusType } from '../types/comments/input';
 
 export class createCommentLike {
   commentId: number;

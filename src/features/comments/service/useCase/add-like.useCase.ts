@@ -1,55 +1,54 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 
 import { ErrorStatus, Result } from '../../../../infrastructure/object-result/objcet-result';
-import { CommentLike, createCommentLike } from '../../entites/comment-like';
-import { PostgresCommentsQueryRepository } from '../../repositories/comments/postgres.comments.query.repository';
-import { CommentsLikesRepository } from '../../repositories/likes/comments-likes.repository';
-import { CommentsLikesQueryRepository } from '../../repositories/likes/comments-likes-query.repository';
-import { LikeStatusType } from '../../types/comments/input';
+import { Comment_like_Orm } from '../../entites/orm_comment_like';
+import { CommentOrmRepository } from '../../repositories/comments/postgres.comments.repository';
+import { CommentOrmLikeRepository } from '../../repositories/likes/comments-likes-query.repository';
+import { LikeStatusE } from '../../types/comments/input';
 
 export class AddLikeToCommentCommand {
   constructor(
     public commentId: number,
     public userId: number,
-    public likeStatus: LikeStatusType,
+    public likeStatus: LikeStatusE,
   ) {}
 }
 
 @CommandHandler(AddLikeToCommentCommand)
 export class AddLikeToCommentUseCase implements ICommandHandler<AddLikeToCommentCommand> {
   constructor(
-    protected postgresCommentsQueryRepository: PostgresCommentsQueryRepository,
-    protected commentLikesQueryRepository: CommentsLikesQueryRepository,
-    protected commentsLikesRepository: CommentsLikesRepository,
+    protected commentRepository: CommentOrmRepository,
+    protected commentLikeRepository: CommentOrmLikeRepository,
   ) {}
 
   async execute({ commentId, userId, likeStatus }: AddLikeToCommentCommand): Promise<Result<string>> {
-    const postIdByComment = await this.postgresCommentsQueryRepository.getPostIdByCommentId(commentId);
-    if (!postIdByComment) return Result.Err(ErrorStatus.NOT_FOUND, `Post for comment ${commentId} not found`);
+    const comment = await this.commentRepository.getById(commentId);
+    if (!comment) return Result.Err(ErrorStatus.NOT_FOUND, `comment ${commentId} not found`);
 
-    const userLike: CommentLike | null = await this.commentLikesQueryRepository.getLikeByUserId(commentId, userId);
-    const newLike: createCommentLike = {
-      commentId: commentId,
-      userId: userId,
-      likeStatus: likeStatus,
-      postId: postIdByComment,
-      createdAt: new Date(),
-    };
+    const userLike: Comment_like_Orm | null = await this.commentLikeRepository.findLikeByUserId(commentId, userId);
+
     if (!userLike) {
+      const newLike = Comment_like_Orm.createCommentLikeModel({
+        commentId,
+        userId,
+        likeStatus,
+      });
       await this.createLike(newLike);
       return Result.Ok('Like created');
     }
+
     // If user's like status is already as expected, no further action needed
     if (likeStatus === userLike.likeStatus) return Result.Ok('Like status is do not changed');
-    await this.updateLike(commentId, likeStatus, userId);
+    await this.updateLike(userLike, likeStatus);
     return Result.Ok('Like updated');
   }
 
-  private async createLike(newLike: createCommentLike): Promise<void> {
-    await this.commentsLikesRepository.createLike(newLike);
+  private async createLike(newLike: Comment_like_Orm): Promise<void> {
+    await this.commentLikeRepository.save(newLike);
   }
 
-  private async updateLike(commentId: number, likeStatus: LikeStatusType, userId: number): Promise<void> {
-    await this.commentsLikesRepository.updateLikeStatus(commentId, userId, likeStatus);
+  private async updateLike(like: Comment_like_Orm, likeStatus: LikeStatusE): Promise<void> {
+    like.updateLikeStatus(likeStatus);
+    await this.commentLikeRepository.save(like);
   }
 }
