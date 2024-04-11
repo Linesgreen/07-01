@@ -1,6 +1,6 @@
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
-import { User_Orm } from '../../users/entites/orm_user';
+import { User_Orm } from '../../users/entites/user.orm.entities';
 
 @Entity()
 export class Session_Orm {

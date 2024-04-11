@@ -21,11 +21,11 @@ import { ErrorResulter } from '../../../infrastructure/object-result/objcet-resu
 import { QueryPaginationResult } from '../../../infrastructure/types/query-sort.type';
 import { CurrentUser } from '../../auth/decorators/current-user.decorator';
 import { PaginationWithItems } from '../../common/types/output';
-import { PostOrmQueryRepository } from '../../posts/repositories/post/postgres.post.query.repository';
+import { PostQueryRepository } from '../../posts/repositories/post/post.query.repository';
 import { PostService } from '../../posts/services/post.service';
 import { PostInBlogUpdateType } from '../../posts/types/input';
 import { OutputPostType } from '../../posts/types/output';
-import { BlogsOrmQueryRepository } from '../repositories/postgres.blogs.query.repository';
+import { BlogsQueryRepository } from '../repositories/blog.query.repository';
 import { BlogsService } from '../services/blogs.service';
 import { BlogCreateModel, PostToBlogCreateModel } from '../types/input';
 import { OutputBlogType } from '../types/output';
@@ -34,9 +34,9 @@ import { OutputBlogType } from '../types/output';
 @Controller('/sa/blogs')
 export class SaBlogsController {
   constructor(
-    protected readonly blogQueryRepository: BlogsOrmQueryRepository,
+    protected readonly blogQueryRepository: BlogsQueryRepository,
     protected readonly blogsService: BlogsService,
-    protected readonly postQueryRepository: PostOrmQueryRepository,
+    protected readonly postQueryRepository: PostQueryRepository,
     protected readonly postService: PostService,
     protected readonly commandBus: CommandBus,
   ) {}
@@ -86,7 +86,7 @@ export class SaBlogsController {
     const result = await this.postService.createPost({ ...postData, blogId });
     if (result.isFailure()) ErrorResulter.proccesError(result);
     const { id: postId } = result.value as { id: number };
-    const post = await this.postQueryRepository.getPostById(postId, null);
+    const post = await this.postQueryRepository.findById(postId, null);
     if (!post) throw new HttpException('Post create error', 500);
     return post;
   }

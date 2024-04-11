@@ -4,10 +4,10 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 
 import { ErrorStatus, Result } from '../../../../infrastructure/object-result/objcet-result';
 import { QueryPaginationResult } from '../../../../infrastructure/types/query-sort.type';
-import { CommentOrmQueryRepository } from '../../../comments/repositories/comments/postgres.comments.query.repository';
+import { CommentQueryRepository } from '../../../comments/repositories/comments/comment.query.repository';
 import { OutputCommentType } from '../../../comments/types/comments/output';
 import { PaginationWithItems } from '../../../common/types/output';
-import { PostOrmRepository } from '../../repositories/post/postgres.post.repository';
+import { PostRepository } from '../../repositories/post/post.repository';
 
 export class GetCommentsToPostWithLikeStatusCommand {
   constructor(
@@ -20,8 +20,8 @@ export class GetCommentsToPostWithLikeStatusCommand {
 @CommandHandler(GetCommentsToPostWithLikeStatusCommand)
 export class GetCommentsForPostUseCase implements ICommandHandler<GetCommentsToPostWithLikeStatusCommand> {
   constructor(
-    protected postRepository: PostOrmRepository,
-    protected commentsQueryRepository: CommentOrmQueryRepository,
+    protected postRepository: PostRepository,
+    protected commentsQueryRepository: CommentQueryRepository,
   ) {}
   // @ts-ignore
   async execute(
@@ -38,7 +38,7 @@ export class GetCommentsForPostUseCase implements ICommandHandler<GetCommentsToP
   }
 
   private async checkPostExist(postId: number) {
-    const post = await this.postRepository.getPostById(postId);
+    const post = await this.postRepository.findById(postId);
     if (!post) return null;
   }
 

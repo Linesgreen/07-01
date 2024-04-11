@@ -17,7 +17,7 @@ import { AuthGuard } from '../../../infrastructure/guards/auth-basic.guard';
 import { ErrorResulter } from '../../../infrastructure/object-result/objcet-result';
 import { QueryPaginationResult } from '../../../infrastructure/types/query-sort.type';
 import { PaginationWithItems } from '../../common/types/output';
-import { ORMUserQueryRepository } from '../repositories/postgres.user.query.repository';
+import { UserQueryRepository } from '../repositories/user.query.repository';
 import { UserService } from '../services/user.service';
 import { UserCreateModel } from '../types/input';
 import { UserOutputType } from '../types/output';
@@ -27,7 +27,7 @@ import { UserOutputType } from '../types/output';
 export class SaUserController {
   constructor(
     protected readonly userService: UserService,
-    protected readonly userQueryRepository: ORMUserQueryRepository,
+    protected readonly userQueryRepository: UserQueryRepository,
   ) {}
   @Post('')
   @HttpCode(201)

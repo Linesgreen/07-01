@@ -23,13 +23,14 @@ import { Comment_like_Orm } from './features/comments/entites/orm_comment_like';
 import { postProviders, postsUseCases } from './features/posts';
 import { PostsController } from './features/posts/controllers/posts.controller';
 import { Post_Orm } from './features/posts/entites/orm_post';
+import { Post_like_Orm } from './features/posts/entites/orm_post.likes';
 import { SecurityController } from './features/security/controllers/security.controller';
 import { Session_Orm } from './features/security/entites/orm_session';
 import { TestingController } from './features/testing/controllers/testing.controller';
 import { userProviders } from './features/users';
 import { SaUserController } from './features/users/controllers/sa.user.controller';
-import { User_Orm } from './features/users/entites/orm_user';
-import { UserOrmRepository } from './features/users/repositories/postgres.user.repository';
+import { User_Orm } from './features/users/entites/user.orm.entities';
+import { UserRepository } from './features/users/repositories/user.repository';
 import { QueryPaginationPipe } from './infrastructure/decorators/transform/query-pagination.pipe';
 import { ConfCodeIsValidConstraint } from './infrastructure/decorators/validate/conf-code.decorator';
 import { EmailIsConformedConstraint } from './infrastructure/decorators/validate/email-is-conformed.decorator';
@@ -55,7 +56,7 @@ const decorators = [
   BlogIsExistConstraint,
   RecoveryCodeIsValidConstraint,
 ];
-//TODo на фор рут асин
+//TODo на фор рут асин и вынести ттл в enw
 @Module({
   imports: [
     ThrottlerModule.forRoot([
@@ -67,7 +68,7 @@ const decorators = [
     ConfigModule.forRoot({ isGlobal: true }),
     //Регистрируем для работы в postgres
     TypeOrmModule.forRoot(configService.getTypeOrmConfig()),
-    TypeOrmModule.forFeature([User_Orm, Session_Orm, Blog_Orm, Post_Orm, Comment_Orm, Comment_like_Orm]),
+    TypeOrmModule.forFeature([User_Orm, Session_Orm, Blog_Orm, Post_Orm, Comment_Orm, Comment_like_Orm, Post_like_Orm]),
     //Регистрируем для испльзования Passport strategy
     PassportModule,
     //Регистрируем для испльзования @CommandHandler
@@ -103,7 +104,7 @@ const decorators = [
     ...strategies,
     ...decorators,
     QueryPaginationPipe,
-    UserOrmRepository,
+    UserRepository,
   ],
 })
 export class AppModule implements NestModule {

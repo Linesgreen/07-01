@@ -1,15 +1,14 @@
 import { Injectable } from '@nestjs/common';
-import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
-import { DataSource, ILike, Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import { ILike, Repository } from 'typeorm';
 
 import { QueryPaginationResult } from '../../../infrastructure/types/query-sort.type';
 import { PaginationWithItems } from '../../common/types/output';
-import { User_Orm } from '../entites/orm_user';
-import { User } from '../entites/user';
+import { User_Orm } from '../entites/user.orm.entities';
 import { UserOutputType } from '../types/output';
 
 @Injectable()
-export class ORMUserQueryRepository {
+export class UserQueryRepository {
   constructor(@InjectRepository(User_Orm) protected userRepository: Repository<User_Orm>) {}
 
   async getUserById(userId: number): Promise<UserOutputType | null> {
@@ -59,40 +58,5 @@ export class ORMUserQueryRepository {
       email: user.email,
       createdAt: user.createdAt.toISOString(),
     };
-  }
-}
-
-@Injectable()
-export class PostgresUserQueryRepository {
-  constructor(@InjectDataSource() private dataSource: DataSource) {}
-
-  async getUserById(userId: string): Promise<UserOutputType | null> {
-    const user = await this.dataSource.query(
-      `SELECT id, login, email, "passwordHash", "confirmationCode", "expirationDate","createdAt", "isConfirmed"
-        FROM public.users
-        WHERE "id" = $1`,
-      [userId],
-    );
-    if (user.length === 0) return null;
-    return User.fromDbToInstance(user[0]).toDto();
-  }
-
-  private async isTextColumn(tableName: string, columnName: string): Promise<boolean> {
-    const columnType = await this.getColumnType(tableName, columnName);
-    return columnType === 'text' || columnType === 'character varying';
-  }
-
-  private async getColumnType(tableName: string, columnName: string): Promise<string> {
-    const query = `
-      SELECT data_type
-      FROM information_schema.columns
-      WHERE table_name = '${tableName}' AND column_name = '${columnName}'
-    `;
-    const result = await this.dataSource.query(query);
-    if (result.length > 0) {
-      return result[0].data_type;
-    } else {
-      throw new Error('Column not found');
-    }
   }
 }

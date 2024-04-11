@@ -5,13 +5,13 @@ import { ErrorResulter } from '../../../infrastructure/object-result/objcet-resu
 import { CurrentSession } from '../../auth/decorators/userId-sessionKey.decorator';
 import { SessionOutputType } from '../../auth/types/output';
 import { SessionOwnerGuard } from '../guards/session-owner.guard';
-import { SessionOrmQueryRepository } from '../repository/session.postgres.query.repository';
+import { SessionQueryRepository } from '../repository/session.query.repository';
 import { SessionService } from '../service/session.service';
 
 @Controller('security')
 export class SecurityController {
   constructor(
-    private sessionQueryRepository: SessionOrmQueryRepository,
+    private sessionQueryRepository: SessionQueryRepository,
     private sessionService: SessionService,
   ) {}
 

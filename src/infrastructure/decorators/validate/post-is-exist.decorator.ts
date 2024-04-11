@@ -8,7 +8,7 @@ import {
   ValidatorConstraintInterface,
 } from 'class-validator';
 
-import { PostgresPostRepository } from '../../../features/posts/repositories/post/postgres.post.repository';
+import { PostRepository } from '../../../features/posts/repositories/post/post.repository';
 
 export function PostIsExist(property?: string, validationOptions?: ValidationOptions) {
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
@@ -27,11 +27,11 @@ export function PostIsExist(property?: string, validationOptions?: ValidationOpt
 @ValidatorConstraint({ name: 'PostIsExist', async: true })
 @Injectable()
 export class PostIsExistConstraint implements ValidatorConstraintInterface {
-  constructor(private readonly postsQueryRepository: PostgresPostRepository) {}
+  constructor(private readonly postsQueryRepository: PostRepository) {}
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async validate(value: any, args: ValidationArguments): Promise<boolean> {
-    const targerPost = await this.postsQueryRepository.chekPostIsExist(value);
+    const targerPost = await this.postsQueryRepository.findById(value);
     if (!targerPost) throw new NotFoundException();
     return true;
   }

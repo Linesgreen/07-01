@@ -17,7 +17,7 @@ import { CommentOwnerGuard } from '../../../infrastructure/guards/comment-owner.
 import { JwtAuthGuard } from '../../../infrastructure/guards/jwt-auth.guard';
 import { ErrorResulter } from '../../../infrastructure/object-result/objcet-result';
 import { CurrentUser } from '../../auth/decorators/current-user.decorator';
-import { CommentOrmQueryRepository } from '../repositories/comments/postgres.comments.query.repository';
+import { CommentQueryRepository } from '../repositories/comments/comment.query.repository';
 import { AddLikeToCommentCommand } from '../service/useCase/add-like.useCase';
 import { DeleteCommentByIdCommand } from '../service/useCase/delte-comment-byId.useCase';
 import { UpdateCommentCommand } from '../service/useCase/update-comment.useCase';
@@ -28,7 +28,7 @@ import { OutputCommentType } from '../types/comments/output';
 export class CommentsController {
   constructor(
     private commandBus: CommandBus,
-    private commentQueryRepository: CommentOrmQueryRepository,
+    private commentQueryRepository: CommentQueryRepository,
   ) {}
 
   @Get(':commentId')

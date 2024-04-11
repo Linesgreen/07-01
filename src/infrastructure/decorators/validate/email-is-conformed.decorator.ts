@@ -8,7 +8,7 @@ import {
   ValidatorConstraintInterface,
 } from 'class-validator';
 
-import { UserOrmRepository } from '../../../features/users/repositories/postgres.user.repository';
+import { UserRepository } from '../../../features/users/repositories/user.repository';
 
 export function EmailIsConformed(property?: string, validationOptions?: ValidationOptions) {
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
@@ -27,12 +27,12 @@ export function EmailIsConformed(property?: string, validationOptions?: Validati
 @ValidatorConstraint({ name: 'EmailIsConformed', async: false })
 @Injectable()
 export class EmailIsConformedConstraint implements ValidatorConstraintInterface {
-  constructor(private readonly postgreeUserRepository: UserOrmRepository) {}
+  constructor(private readonly postgreeUserRepository: UserRepository) {}
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async validate(value: any, args: ValidationArguments): Promise<boolean> {
     const targerUser = await this.postgreeUserRepository.getByLoginOrEmail(value);
-    if (!targerUser || targerUser.emailConfirmation.isConfirmed) return false;
+    if (!targerUser || targerUser.isConfirmed) return false;
     return true;
   }
 

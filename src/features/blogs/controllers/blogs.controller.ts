@@ -1,21 +1,19 @@
 import { Controller, Get, NotFoundException, Param, ParseIntPipe, Query } from '@nestjs/common';
-import { CommandBus } from '@nestjs/cqrs';
 
 import { QueryPaginationPipe } from '../../../infrastructure/decorators/transform/query-pagination.pipe';
 import { QueryPaginationResult } from '../../../infrastructure/types/query-sort.type';
 import { CurrentUser } from '../../auth/decorators/current-user.decorator';
 import { PaginationWithItems } from '../../common/types/output';
-import { PostOrmQueryRepository } from '../../posts/repositories/post/postgres.post.query.repository';
+import { PostQueryRepository } from '../../posts/repositories/post/post.query.repository';
 import { OutputPostType } from '../../posts/types/output';
-import { BlogsOrmQueryRepository } from '../repositories/postgres.blogs.query.repository';
+import { BlogsQueryRepository } from '../repositories/blog.query.repository';
 import { OutputBlogType } from '../types/output';
 
 @Controller('blogs')
 export class BlogsController {
   constructor(
-    protected readonly blogQueryRepository: BlogsOrmQueryRepository,
-    protected readonly postQueryRepository: PostOrmQueryRepository,
-    protected readonly commandBus: CommandBus,
+    protected readonly blogQueryRepository: BlogsQueryRepository,
+    protected readonly postQueryRepository: PostQueryRepository,
   ) {}
 
   @Get('')

@@ -2,7 +2,7 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 
 import { ErrorStatus, Result } from '../../../../infrastructure/object-result/objcet-result';
 import { Session } from '../../../security/entites/session';
-import { SessionOrmRepository } from '../../../security/repository/session.postgres.repository';
+import { SessionRepository } from '../../../security/repository/session.repository';
 import { AuthService } from '../auth.service';
 
 export class RefreshTokenCommand {
@@ -15,7 +15,7 @@ export class RefreshTokenCommand {
 @CommandHandler(RefreshTokenCommand)
 export class RefreshTokenUseCase implements ICommandHandler<RefreshTokenCommand> {
   constructor(
-    protected sessionRepository: SessionOrmRepository,
+    protected sessionRepository: SessionRepository,
     protected authService: AuthService,
   ) {}
 

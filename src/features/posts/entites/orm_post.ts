@@ -2,6 +2,7 @@ import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColum
 
 import { Blog_Orm } from '../../blogs/entites/orm_blogs';
 import { Comment_Orm } from '../../comments/entites/orm_comment';
+import { Post_like_Orm } from './orm_post.likes';
 import { PostCreateModel } from './post';
 
 @Entity()
@@ -33,6 +34,9 @@ export class Post_Orm {
 
   @OneToMany(() => Comment_Orm, (c) => c.post)
   comments: Comment_Orm[];
+
+  @OneToMany(() => Post_like_Orm, (pl) => pl.post)
+  likes: Post_like_Orm[];
 
   static createPostModel(postData: PostCreateModel): Post_Orm {
     const post = new Post_Orm();

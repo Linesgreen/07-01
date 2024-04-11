@@ -1,7 +1,7 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 
 import { Result } from '../../../../infrastructure/object-result/objcet-result';
-import { UserOrmRepository } from '../../../users/repositories/postgres.user.repository';
+import { UserRepository } from '../../../users/repositories/user.repository';
 
 export class ChangeUserConfirmationCommand {
   constructor(
@@ -12,17 +12,17 @@ export class ChangeUserConfirmationCommand {
 
 @CommandHandler(ChangeUserConfirmationCommand)
 export class ChangeUserConfirmationUseCase implements ICommandHandler<ChangeUserConfirmationCommand> {
-  constructor(protected postgreeUserRepository: UserOrmRepository) {}
+  constructor(protected userRepository: UserRepository) {}
 
   async execute(command: ChangeUserConfirmationCommand): Promise<Result<string>> {
     const { confCode, confirmationStatus } = command;
-    const user = await this.postgreeUserRepository.findByConfirmationCode(confCode);
+    const user = await this.userRepository.findByConfirmationCode(confCode);
     //TODO сделать нормально!
     if (!user) {
       throw new Error('user not found');
     }
     user.updateConfirmationStatus(confirmationStatus);
-    await this.postgreeUserRepository.updateUserInfo(user);
+    await this.userRepository.save(user);
     return Result.Ok('user confirmed successfully');
   }
 }

@@ -10,7 +10,7 @@ import {
   ValidatorConstraintInterface,
 } from 'class-validator';
 
-import { UserOrmRepository } from '../../../features/users/repositories/postgres.user.repository';
+import { UserRepository } from '../../../features/users/repositories/user.repository';
 
 export function NameIsExist(property?: string, validationOptions?: ValidationOptions) {
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
@@ -29,7 +29,7 @@ export function NameIsExist(property?: string, validationOptions?: ValidationOpt
 @ValidatorConstraint({ name: 'NameIsExist', async: false })
 @Injectable()
 export class NameIsExistConstraint implements ValidatorConstraintInterface {
-  constructor(protected postgreeUserRepository: UserOrmRepository) {}
+  constructor(protected postgreeUserRepository: UserRepository) {}
 
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   async validate(value: any, args: ValidationArguments) {

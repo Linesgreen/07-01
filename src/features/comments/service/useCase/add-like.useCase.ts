@@ -2,8 +2,8 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 
 import { ErrorStatus, Result } from '../../../../infrastructure/object-result/objcet-result';
 import { Comment_like_Orm } from '../../entites/orm_comment_like';
-import { CommentOrmRepository } from '../../repositories/comments/postgres.comments.repository';
-import { CommentOrmLikeRepository } from '../../repositories/likes/comments-likes-query.repository';
+import { CommentOrmRepository } from '../../repositories/comments/comment.repository';
+import { CommentLikeRepository } from '../../repositories/likes/comments-likes-query.repository';
 import { LikeStatusE } from '../../types/comments/input';
 
 export class AddLikeToCommentCommand {
@@ -18,7 +18,7 @@ export class AddLikeToCommentCommand {
 export class AddLikeToCommentUseCase implements ICommandHandler<AddLikeToCommentCommand> {
   constructor(
     protected commentRepository: CommentOrmRepository,
-    protected commentLikeRepository: CommentOrmLikeRepository,
+    protected commentLikeRepository: CommentLikeRepository,
   ) {}
 
   async execute({ commentId, userId, likeStatus }: AddLikeToCommentCommand): Promise<Result<string>> {

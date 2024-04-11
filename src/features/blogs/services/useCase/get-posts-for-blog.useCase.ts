@@ -6,9 +6,9 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { ErrorStatus, Result } from '../../../../infrastructure/object-result/objcet-result';
 import { QueryPaginationResult } from '../../../../infrastructure/types/query-sort.type';
 import { PaginationWithItems } from '../../../common/types/output';
-import { PostOrmQueryRepository } from '../../../posts/repositories/post/postgres.post.query.repository';
+import { PostQueryRepository } from '../../../posts/repositories/post/post.query.repository';
 import { OutputPostType } from '../../../posts/types/output';
-import { BlogsOrmRepository } from '../../repositories/postgres.blogs.repository';
+import { BlogsRepository } from '../../repositories/blog.repository';
 
 export class GetPostForBlogCommand {
   constructor(
@@ -21,8 +21,8 @@ export class GetPostForBlogCommand {
 @CommandHandler(GetPostForBlogCommand)
 export class GetPostForBlogUseCase implements ICommandHandler<GetPostForBlogCommand> {
   constructor(
-    protected postQueryRepository: PostOrmQueryRepository,
-    protected blogRepository: BlogsOrmRepository,
+    protected postQueryRepository: PostQueryRepository,
+    protected blogRepository: BlogsRepository,
   ) {}
 
   async execute(command: GetPostForBlogCommand): Promise<Result<string | PaginationWithItems<OutputPostType>>> {

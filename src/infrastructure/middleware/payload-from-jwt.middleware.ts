@@ -3,13 +3,13 @@ import { Injectable, NestMiddleware } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { NextFunction, Request, Response } from 'express';
 
-import { UserOrmRepository } from '../../features/users/repositories/postgres.user.repository';
+import { UserRepository } from '../../features/users/repositories/user.repository';
 //Прописываем в настройкаъ App modules
 @Injectable()
 export class PayloadFromJwtMiddleware implements NestMiddleware {
   constructor(
     private jwtService: JwtService,
-    private userOrmRepository: UserOrmRepository,
+    private userOrmRepository: UserRepository,
   ) {}
 
   async use(req: Request, res: Response, next: NextFunction) {

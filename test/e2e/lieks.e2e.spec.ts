@@ -31,7 +31,7 @@ let blogId: string;
 let postId: string;
 let commentsUser1;
 let commentsUser2;
-describe('Users e2e test', () => {
+describe('Likes e2e test', () => {
   let app: INestApplication;
   let httpServer;
   let postTestManager: PostTestManager;
@@ -201,7 +201,7 @@ describe('Users e2e test', () => {
       expect(response.body.items[1].likesInfo.myStatus).toEqual('Like');
     });
   });
-  describe('likes', () => {
+  describe('posts likes', () => {
     const user3CreateData = {
       login: '3logTest',
       password: '3qwerty',

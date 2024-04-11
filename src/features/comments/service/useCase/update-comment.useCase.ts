@@ -1,7 +1,7 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 
 import { ErrorStatus, Result } from '../../../../infrastructure/object-result/objcet-result';
-import { CommentOrmRepository } from '../../repositories/comments/postgres.comments.repository';
+import { CommentOrmRepository } from '../../repositories/comments/comment.repository';
 
 export class UpdateCommentCommand {
   constructor(

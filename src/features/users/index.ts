@@ -1,11 +1,5 @@
-import { ORMUserQueryRepository, PostgresUserQueryRepository } from './repositories/postgres.user.query.repository';
-import { PostgresUserRepository, UserOrmRepository } from './repositories/postgres.user.repository';
+import { UserQueryRepository } from './repositories/user.query.repository';
+import { UserRepository } from './repositories/user.repository';
 import { UserService } from './services/user.service';
 
-export const userProviders = [
-  UserOrmRepository,
-  UserService,
-  PostgresUserRepository,
-  PostgresUserQueryRepository,
-  ORMUserQueryRepository,
-];
+export const userProviders = [UserRepository, UserService, UserQueryRepository];

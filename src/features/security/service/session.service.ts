@@ -2,11 +2,11 @@
 import { Injectable } from '@nestjs/common';
 
 import { ErrorStatus, Result } from '../../../infrastructure/object-result/objcet-result';
-import { SessionOrmRepository } from '../repository/session.postgres.repository';
+import { SessionRepository } from '../repository/session.repository';
 
 @Injectable()
 export class SessionService {
-  constructor(protected sessionRepository: SessionOrmRepository) {}
+  constructor(protected sessionRepository: SessionRepository) {}
 
   async terminateCurrentSession(userId: number, tokenKey: string): Promise<Result<string>> {
     await this.sessionRepository.terminateSessionByTokenKey(tokenKey);

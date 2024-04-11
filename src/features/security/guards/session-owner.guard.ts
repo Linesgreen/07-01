@@ -1,13 +1,13 @@
 import { CanActivate, ExecutionContext, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 
 import { Session } from '../entites/session';
-import { SessionOrmRepository } from '../repository/session.postgres.repository';
+import { SessionRepository } from '../repository/session.repository';
 
 // Custom guard
 // https://docs.nestjs.com/guards
 @Injectable()
 export class SessionOwnerGuard implements CanActivate {
-  constructor(private sessionOrmRepository: SessionOrmRepository) {}
+  constructor(private sessionOrmRepository: SessionRepository) {}
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
     const deviceId = request.params.id;

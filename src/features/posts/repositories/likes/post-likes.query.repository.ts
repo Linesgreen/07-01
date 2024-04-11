@@ -1,20 +1,18 @@
 import { Injectable } from '@nestjs/common';
-import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
-import { AbstractRepository } from '../../../../infrastructure/repositories/abstract.repository';
-import { PostLike, PostLikeWithLoginFromDb } from '../../entites/like';
+import { Post_like_Orm } from '../../entites/orm_post.likes';
 
 @Injectable()
-export class PostLikesQueryRepository extends AbstractRepository<PostLikeWithLoginFromDb> {
-  constructor(@InjectDataSource() protected dataSource: DataSource) {
-    super(dataSource);
+export class PostLikeRepository {
+  constructor(@InjectRepository(Post_like_Orm) private readonly postLikeRepository: Repository<Post_like_Orm>) {}
+  async findByUserIdAndPostId(userId: number, postId: number): Promise<Post_like_Orm | null> {
+    const like = await this.postLikeRepository.findOneBy({ userId, postId });
+    return like;
   }
 
-  async getLikeByUserId(postId: number, userId: number): Promise<PostLike | null> {
-    const tableName = 'post_likes';
-    const fieldsToSelect = ['likeStatus', 'createdAt', 'postId', 'blogId', 'userId', 'id'];
-    const like = await this.getByFields(tableName, fieldsToSelect, { postId, userId });
-    return like ? like[0] : null;
+  async save(like: Post_like_Orm): Promise<void> {
+    await like.save();
   }
 }

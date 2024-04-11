@@ -4,11 +4,11 @@ import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import * as process from 'process';
 
-import { SessionOrmRepository } from '../../features/security/repository/session.postgres.repository';
+import { SessionRepository } from '../../features/security/repository/session.repository';
 
 @Injectable()
 export class CookieJwtStrategy extends PassportStrategy(Strategy, 'jwt-cookie') {
-  constructor(private sesionRepository: SessionOrmRepository) {
+  constructor(private sesionRepository: SessionRepository) {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
         (request) => {

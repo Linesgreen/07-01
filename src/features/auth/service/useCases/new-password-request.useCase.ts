@@ -2,7 +2,7 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 
 import { ErrorStatus, Result } from '../../../../infrastructure/object-result/objcet-result';
 import { MailService } from '../../../../mail/mail.service';
-import { UserOrmRepository } from '../../../users/repositories/postgres.user.repository';
+import { UserRepository } from '../../../users/repositories/user.repository';
 import { AuthService } from '../auth.service';
 
 export class NewPasswordRequestCommand {
@@ -13,7 +13,7 @@ export class NewPasswordRequestCommand {
 export class NewPasswordRequestUseCase implements ICommandHandler<NewPasswordRequestCommand> {
   constructor(
     protected mailService: MailService,
-    protected userRepository: UserOrmRepository,
+    protected userRepository: UserRepository,
     protected authService: AuthService,
   ) {}
 

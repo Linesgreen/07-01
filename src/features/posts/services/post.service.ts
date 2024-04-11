@@ -2,17 +2,17 @@
 import { Injectable } from '@nestjs/common';
 
 import { ErrorStatus, Result } from '../../../infrastructure/object-result/objcet-result';
-import { BlogsOrmRepository } from '../../blogs/repositories/postgres.blogs.repository';
+import { BlogsRepository } from '../../blogs/repositories/blog.repository';
 import { Post_Orm } from '../entites/orm_post';
 import { PostCreateModel } from '../entites/post';
-import { PostOrmRepository } from '../repositories/post/postgres.post.repository';
+import { PostRepository } from '../repositories/post/post.repository';
 import { PostInBlogUpdateType } from '../types/input';
 
 @Injectable()
 export class PostService {
   constructor(
-    protected blogRepository: BlogsOrmRepository,
-    protected postRepository: PostOrmRepository,
+    protected blogRepository: BlogsRepository,
+    protected postRepository: PostRepository,
   ) {}
   async createPost(postData: PostCreateModel): Promise<Result<{ id: number } | string>> {
     const targetBlog = await this.blogRepository.getById(Number(postData.blogId));
@@ -26,7 +26,7 @@ export class PostService {
   }
 
   async updatePost(params: PostInBlogUpdateType, postId: number, blogId: number): Promise<Result<string>> {
-    const post = await this.postRepository.getPostById(postId);
+    const post = await this.postRepository.findById(postId);
     if (!post) return Result.Err(ErrorStatus.NOT_FOUND, 'Post Not Found');
 
     const blogIsExist = await this.blogRepository.getById(blogId);
@@ -41,7 +41,7 @@ export class PostService {
     const blog = await this.blogRepository.getById(blogId);
     if (!blog) return Result.Err(ErrorStatus.NOT_FOUND, `Blog ${blogId} Not Found`);
 
-    const post = await this.postRepository.getPostById(postId);
+    const post = await this.postRepository.findById(postId);
     if (!post) return Result.Err(ErrorStatus.NOT_FOUND, `Post ${postId} Not Found`);
 
     await this.postRepository.deleteById(postId);

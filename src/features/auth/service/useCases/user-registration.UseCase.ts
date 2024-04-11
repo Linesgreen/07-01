@@ -2,7 +2,7 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 
 import { ErrorStatus, Result } from '../../../../infrastructure/object-result/objcet-result';
 import { MailService } from '../../../../mail/mail.service';
-import { UserOrmRepository } from '../../../users/repositories/postgres.user.repository';
+import { UserRepository } from '../../../users/repositories/user.repository';
 import { UserService } from '../../../users/services/user.service';
 import { UserRegistrationModel } from '../../types/input';
 
@@ -15,7 +15,7 @@ export class UserRegistrationUseCase implements ICommandHandler<UserRegistration
   constructor(
     protected userService: UserService,
     protected mailService: MailService,
-    private userOrmRepository: UserOrmRepository,
+    private userOrmRepository: UserRepository,
   ) {}
 
   async execute(command: UserRegistrationCommand): Promise<Result<string>> {
@@ -25,9 +25,10 @@ export class UserRegistrationUseCase implements ICommandHandler<UserRegistration
 
     const userId = createResult.value.id;
     const user = await this.userOrmRepository.getById(userId);
+
     if (!user) return Result.Err(ErrorStatus.SERVER_ERROR, 'User created but not found');
 
-    const confirmationCode = user.emailConfirmation.confirmationCode;
+    const confirmationCode = user.confirmationCode;
     await this.mailService.sendUserConfirmation(email, login, confirmationCode);
 
     return Result.Ok('user registered successfully');

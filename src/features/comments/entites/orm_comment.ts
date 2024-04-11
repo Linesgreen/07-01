@@ -2,7 +2,7 @@ import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColum
 
 import { Blog_Orm } from '../../blogs/entites/orm_blogs';
 import { Post_Orm } from '../../posts/entites/orm_post';
-import { User_Orm } from '../../users/entites/orm_user';
+import { User_Orm } from '../../users/entites/user.orm.entities';
 import { CommentUpdateModel } from '../types/comments/input';
 import { CommentCreateData } from './commentPG';
 import { Comment_like_Orm } from './orm_comment_like';

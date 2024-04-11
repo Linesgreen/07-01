@@ -3,7 +3,7 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 
 import { Result } from '../../../../infrastructure/object-result/objcet-result';
 import { Session } from '../../../security/entites/session';
-import { SessionOrmRepository } from '../../../security/repository/session.postgres.repository';
+import { SessionRepository } from '../../../security/repository/session.repository';
 import { AuthService } from '../auth.service';
 
 export class UserLoginCommand {
@@ -17,7 +17,7 @@ export class UserLoginCommand {
 @CommandHandler(UserLoginCommand)
 export class UserLoginUseCase implements ICommandHandler<UserLoginCommand> {
   constructor(
-    protected postgresSessionRepository: SessionOrmRepository,
+    protected postgresSessionRepository: SessionRepository,
     protected authService: AuthService,
   ) {}
 
