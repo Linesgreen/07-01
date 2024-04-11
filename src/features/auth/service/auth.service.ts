@@ -8,7 +8,7 @@ import { configService } from '../../../settings/config.service';
 export class AuthService {
   constructor(protected jwtService: JwtService) {}
   async generateTokenPair(
-    userId: string,
+    userId: number,
     tokenKey: string,
     deviceId: string,
   ): Promise<{ token: string; refreshToken: string }> {
@@ -21,7 +21,7 @@ export class AuthService {
 
   async createJwt(
     payload: {
-      [key: string]: string;
+      [key: string]: number | string;
     },
     expirationTimeInSeconds: string,
   ): Promise<string> {

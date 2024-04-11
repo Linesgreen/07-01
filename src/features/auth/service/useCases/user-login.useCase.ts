@@ -2,8 +2,9 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 
 import { Result } from '../../../../infrastructure/object-result/objcet-result';
-import { Session } from '../../../security/entites/session';
+import { Session_Orm } from '../../../security/entites/orm_session';
 import { SessionRepository } from '../../../security/repository/session.repository';
+import { SessionCreateData } from '../../../security/types/commot.types';
 import { AuthService } from '../auth.service';
 
 export class UserLoginCommand {
@@ -17,7 +18,7 @@ export class UserLoginCommand {
 @CommandHandler(UserLoginCommand)
 export class UserLoginUseCase implements ICommandHandler<UserLoginCommand> {
   constructor(
-    protected postgresSessionRepository: SessionRepository,
+    protected sessionRepository: SessionRepository,
     protected authService: AuthService,
   ) {}
 
@@ -25,20 +26,13 @@ export class UserLoginUseCase implements ICommandHandler<UserLoginCommand> {
     const { userId, ip, userAgent } = command;
     const tokenKey = crypto.randomUUID();
     const deviceId = crypto.randomUUID();
-    await this.createSession({ userId, deviceId, ip, userAgent, tokenKey });
-    const { token, refreshToken } = await this.authService.generateTokenPair(userId.toString(), tokenKey, deviceId);
+    await this.createSession({ userId, deviceId, ip, title: userAgent, tokenKey });
+    const { token, refreshToken } = await this.authService.generateTokenPair(userId, tokenKey, deviceId);
     return Result.Ok({ token, refreshToken });
   }
 
-  async createSession(sessionData: {
-    userId: number;
-    deviceId: string;
-    ip: string;
-    userAgent: string;
-    tokenKey: string;
-  }): Promise<void> {
-    const { userId, deviceId, ip, userAgent, tokenKey } = sessionData;
-    const session = new Session(tokenKey, deviceId, userAgent, userId, ip);
-    await this.postgresSessionRepository.createSession(session);
+  async createSession(sessionData: SessionCreateData): Promise<void> {
+    const session = Session_Orm.createSessionModel(sessionData);
+    await this.sessionRepository.save(session);
   }
 }

@@ -11,12 +11,12 @@ class ConfigService {
   constructor(private env: { [k: string]: string | undefined }) {}
 
   public ensureValues(keys: string[]): ConfigService {
-    keys.forEach((k) => this.getValue(k));
+    keys.forEach((k) => this._getValue(k));
     return this;
   }
 
   public getPort(): string {
-    return this.getValue('PORT');
+    return this._getValue('PORT');
   }
 
   public isProduction(): boolean {
@@ -28,11 +28,11 @@ class ConfigService {
   public getTypeOrmConfig(): TypeOrmModuleOptions {
     return {
       type: 'postgres',
-      host: this.getValue('POSTGRES_HOST'),
-      port: parseInt(this.getValue('POSTGRES_PORT')),
-      username: this.getValue('POSTGRES_USER'),
-      password: this.getValue('POSTGRES_PASSWORD'),
-      database: this.getValue('POSTGRES_DATABASE'),
+      host: this._getValue('POSTGRES_HOST'),
+      port: parseInt(this._getValue('POSTGRES_PORT')),
+      username: this._getValue('POSTGRES_USER'),
+      password: this._getValue('POSTGRES_PASSWORD'),
+      database: this._getValue('POSTGRES_DATABASE'),
       autoLoadEntities: !this.isProduction(),
       synchronize: !this.isProduction(),
       logging: true,
@@ -41,22 +41,22 @@ class ConfigService {
   }
 
   public getGmailUser(): string {
-    return this.getValue('GMAIL_USER');
+    return this._getValue('GMAIL_USER');
   }
 
   public getGmailPass(): string {
-    return this.getValue('GMAIL_PASS');
+    return this._getValue('GMAIL_PASS');
   }
 
   public getTokenExp(): string {
-    return this.getValue('TOKEN_EXP');
+    return this._getValue('TOKEN_EXP');
   }
 
   public getRefreshTokenExp(): string {
-    return this.getValue('REFRESH_TOKEN_EXP');
+    return this._getValue('REFRESH_TOKEN_EXP');
   }
 
-  private getValue(key: string): string {
+  private _getValue(key: string): string {
     const value = this.env[key];
     if (!value) {
       throw new Error(`config error - missing env.${key}`);

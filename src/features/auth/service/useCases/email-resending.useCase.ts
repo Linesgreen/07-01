@@ -2,7 +2,6 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 
 import { ErrorStatus, Result } from '../../../../infrastructure/object-result/objcet-result';
 import { MailService } from '../../../../mail/mail.service';
-import { User_Orm } from '../../../users/entites/user.orm.entities';
 import { UserRepository } from '../../../users/repositories/user.repository';
 
 export class EmailResendingCommand {
@@ -23,18 +22,11 @@ export class EmailResendingUseCase implements ICommandHandler<EmailResendingComm
     targetUser.updateConfirmationCode();
 
     // Получаем информацию для обновления полей
-    const { confirmationCode, login } = this.getUpdateFieldsInfo(targetUser);
+    const { confirmationCode, login } = targetUser;
 
     // Обновляем поле и отправляем письмо с подтверждением
     await this.userRepository.save(targetUser);
-    await this.mailService.sendUserConfirmation(email, login, confirmationCode);
+    await this.mailService.sendUserConfirmation({ email, login, token: confirmationCode });
     return Result.Ok('email sended');
-  }
-
-  // Метод для получения информации для обновления полей
-  private getUpdateFieldsInfo(targetUser: User_Orm): { confirmationCode: string; login: string } {
-    const confirmationCode = targetUser.confirmationCode;
-    const login = targetUser.login;
-    return { confirmationCode, login };
   }
 }

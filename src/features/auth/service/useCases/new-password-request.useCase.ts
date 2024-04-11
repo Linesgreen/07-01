@@ -37,7 +37,7 @@ export class NewPasswordRequestUseCase implements ICommandHandler<NewPasswordReq
 
   private async sendEmail(email: string, passwordRecoveryToken: string): Promise<Result<string>> {
     try {
-      await this.mailService.sendUserConfirmation(email, 'User', passwordRecoveryToken);
+      await this.mailService.sendUserConfirmation({ email, login: 'User', token: passwordRecoveryToken });
       return Result.Ok('email sended');
     } catch (error) {
       console.error(error);

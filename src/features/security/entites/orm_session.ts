@@ -1,9 +1,12 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { add } from 'date-fns';
+import { BaseEntity, Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
+import { configService } from '../../../settings/config.service';
 import { User_Orm } from '../../users/entites/user.orm.entities';
+import { SessionCreateData } from '../types/commot.types';
 
 @Entity()
-export class Session_Orm {
+export class Session_Orm extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   deviceId: string;
 
@@ -33,4 +36,28 @@ export class Session_Orm {
   @ManyToOne(() => User_Orm, (u) => u.sessions)
   @JoinColumn({ name: 'userId' })
   user: User_Orm;
+
+  static createSessionModel(sessionCreateData: SessionCreateData): Session_Orm {
+    const refTokenExpTime = configService.getRefreshTokenExp();
+
+    const session = new Session_Orm();
+    session.tokenKey = sessionCreateData.tokenKey;
+    session.issuedDate = new Date();
+    session.expiredDate = add(new Date(), {
+      seconds: Number(refTokenExpTime),
+    });
+    session.title = sessionCreateData.title;
+    session.ip = sessionCreateData.ip;
+    session.userId = sessionCreateData.userId;
+    session.deviceId = sessionCreateData.deviceId;
+    return session;
+  }
+  updateSession(newTokenKey: string): void {
+    const refTokenExpTime = configService.getRefreshTokenExp();
+    this.issuedDate = new Date();
+    this.tokenKey = newTokenKey;
+    this.expiredDate = add(new Date(), {
+      seconds: Number(refTokenExpTime),
+    });
+  }
 }

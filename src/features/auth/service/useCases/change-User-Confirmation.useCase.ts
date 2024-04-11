@@ -1,6 +1,6 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 
-import { Result } from '../../../../infrastructure/object-result/objcet-result';
+import { ErrorStatus, Result } from '../../../../infrastructure/object-result/objcet-result';
 import { UserRepository } from '../../../users/repositories/user.repository';
 
 export class ChangeUserConfirmationCommand {
@@ -17,9 +17,8 @@ export class ChangeUserConfirmationUseCase implements ICommandHandler<ChangeUser
   async execute(command: ChangeUserConfirmationCommand): Promise<Result<string>> {
     const { confCode, confirmationStatus } = command;
     const user = await this.userRepository.findByConfirmationCode(confCode);
-    //TODO сделать нормально!
     if (!user) {
-      throw new Error('user not found');
+      return Result.Err(ErrorStatus.SERVER_ERROR, `user with code ${confCode} not found`);
     }
     user.updateConfirmationStatus(confirmationStatus);
     await this.userRepository.save(user);

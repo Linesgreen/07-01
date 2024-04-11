@@ -9,16 +9,16 @@ import { Session } from '../entites/session';
 
 export class SessionRepository {
   constructor(@InjectRepository(Session_Orm) protected sessionRepository: Repository<Session_Orm>) {}
-  async createSession(session: Session): Promise<{ id: number }> {
-    const newSession = await this.sessionRepository.save(session);
-    return { id: newSession.id };
+  async save(session: Session_Orm): Promise<{ id: string }> {
+    await this.sessionRepository.save(session);
+    return { id: session.deviceId };
   }
 
-  async getByUserIdAndTokenKey(userId: number, tokenKey: string): Promise<Session | null> {
+  async getByUserIdAndTokenKey(userId: number, tokenKey: string): Promise<Session_Orm | null> {
     const session = await this.sessionRepository.findOneBy([{ userId, tokenKey, isActive: true }]);
 
     if (!session) return null;
-    return Session.fromDbToInstance(session);
+    return session;
   }
 
   async getByDeviceId(deviceId: string): Promise<Session | null> {

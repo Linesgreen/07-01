@@ -80,11 +80,12 @@ export class AuthController {
   }
 
   // Метод для обновления токенов
+  //TODO вынести кукис в отдельный метод
   @UseGuards(CookieJwtGuard)
   @Post('refresh-token')
   @HttpCode(200)
   async createNewTokensPair(
-    @CurrentSession() { userId, tokenKey }: { userId: string; tokenKey: string },
+    @CurrentSession() { userId, tokenKey }: { userId: number; tokenKey: string },
     @Res({ passthrough: true }) res: Response,
   ): Promise<{ accessToken: string }> {
     const result = await this.commandBus.execute(new RefreshTokenCommand(userId, tokenKey));

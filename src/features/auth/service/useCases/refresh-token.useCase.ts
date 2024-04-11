@@ -1,13 +1,13 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 
 import { ErrorStatus, Result } from '../../../../infrastructure/object-result/objcet-result';
-import { Session } from '../../../security/entites/session';
+import { Session_Orm } from '../../../security/entites/orm_session';
 import { SessionRepository } from '../../../security/repository/session.repository';
 import { AuthService } from '../auth.service';
 
 export class RefreshTokenCommand {
   constructor(
-    public userId: string,
+    public userId: number,
     public tokenKey: string,
   ) {}
 }
@@ -33,16 +33,14 @@ export class RefreshTokenUseCase implements ICommandHandler<RefreshTokenCommand>
     return Result.Ok({ token, refreshToken });
   }
 
-  async findSession(userId: string, tokenKey: string): Promise<Session | null> {
-    const session = await this.sessionRepository.getByUserIdAndTokenKey(Number(userId), tokenKey);
-
+  async findSession(userId: number, tokenKey: string): Promise<Session_Orm | null> {
+    const session = await this.sessionRepository.getByUserIdAndTokenKey(userId, tokenKey);
     if (!session) return null;
-
     return session;
   }
 
-  async updateAndSaveSession(session: Session, newTokenKey: string): Promise<void> {
+  async updateAndSaveSession(session: Session_Orm, newTokenKey: string): Promise<void> {
     session.updateSession(newTokenKey);
-    await this.sessionRepository.updateSession(session);
+    await this.sessionRepository.save(session);
   }
 }

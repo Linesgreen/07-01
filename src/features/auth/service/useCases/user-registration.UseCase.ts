@@ -29,7 +29,7 @@ export class UserRegistrationUseCase implements ICommandHandler<UserRegistration
     if (!user) return Result.Err(ErrorStatus.SERVER_ERROR, 'User created but not found');
 
     const confirmationCode = user.confirmationCode;
-    await this.mailService.sendUserConfirmation(email, login, confirmationCode);
+    await this.mailService.sendUserConfirmation({ email, login, token: confirmationCode });
 
     return Result.Ok('user registered successfully');
   }
