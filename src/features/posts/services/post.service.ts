@@ -3,10 +3,9 @@ import { Injectable } from '@nestjs/common';
 
 import { ErrorStatus, Result } from '../../../infrastructure/object-result/objcet-result';
 import { BlogsRepository } from '../../blogs/repositories/blog.repository';
-import { Post_Orm } from '../entites/orm_post';
-import { PostCreateModel } from '../entites/post';
+import { Post_Orm } from '../entites/post.orm.entities';
 import { PostRepository } from '../repositories/post/post.repository';
-import { PostInBlogUpdateType } from '../types/input';
+import { PostCreateModel, PostInBlogUpdateType } from '../types/input';
 
 @Injectable()
 export class PostService {
@@ -20,7 +19,7 @@ export class PostService {
 
     const newPost = Post_Orm.createPostModel(postData);
 
-    const { id: postId } = await this.postRepository.addPost(newPost);
+    const { id: postId } = await this.postRepository.save(newPost);
 
     return Result.Ok({ id: postId });
   }

@@ -1,8 +1,8 @@
 import { IsEnum, IsString, Length } from 'class-validator';
 
 import { Trim } from '../../../../infrastructure/decorators/transform/trim';
-//TODO перевести на enum
-export enum LikeStatusE {
+
+export enum LikeStatus {
   None = 'None',
   Like = 'Like',
   Dislike = 'Dislike',
@@ -16,8 +16,6 @@ export class CommentUpdateModel {
 }
 
 export class LikeCreateModel {
-  @IsEnum(LikeStatusE)
-  likeStatus: LikeStatusE;
+  @IsEnum(LikeStatus)
+  likeStatus: LikeStatus;
 }
-
-export type LikeStatusType = 'None' | 'Like' | 'Dislike';

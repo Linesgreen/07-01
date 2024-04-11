@@ -6,10 +6,10 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 
 import { QueryPaginationResult } from '../../../../infrastructure/types/query-sort.type';
-import { LikeStatusE } from '../../../comments/types/comments/input';
-import { PaginationWithItems } from '../../../common/types/output';
-import { Post_Orm } from '../../entites/orm_post';
-import { Post_like_Orm } from '../../entites/orm_post.likes';
+import { PaginationWithItems } from '../../../../infrastructure/utils/createPagination';
+import { LikeStatus } from '../../../comments/types/comments/input';
+import { Post_Orm } from '../../entites/post.orm.entities';
+import { Post_like_Orm } from '../../entites/post-like.orm.entities';
 import { OutputPostType } from '../../types/output';
 
 @Injectable()
@@ -188,7 +188,7 @@ export class PostQueryRepository {
         extendedLikesInfo: {
           likesCount: likes_count.get(post.id)?.likesCount ?? 0,
           dislikesCount: likes_count.get(post.id)?.dislikesCount ?? 0,
-          myStatus: user_statuse.get(post.id) ?? LikeStatusE.None,
+          myStatus: user_statuse.get(post.id) ?? LikeStatus.None,
           newestLikes: newestLikes,
         },
       };
@@ -209,7 +209,7 @@ export class PostQueryRepository {
             .select('likes.id', 'likeId') // Указываем идентификатор явно
             .addSelect('ROW_NUMBER() OVER(PARTITION BY likes."postId" ORDER BY likes."createdAt" DESC)', 'rn')
             .where('likes."postId" IN (:...postIds)', { postIds })
-            .andWhere('likes."likeStatus" = :likeStatus', { likeStatus: LikeStatusE.Like });
+            .andWhere('likes."likeStatus" = :likeStatus', { likeStatus: LikeStatus.Like });
         },
         'likes_with_rn',
         '"likes"."id" = likes_with_rn."likeId"',

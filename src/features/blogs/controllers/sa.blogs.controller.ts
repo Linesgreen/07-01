@@ -19,8 +19,8 @@ import { QueryPaginationPipe } from '../../../infrastructure/decorators/transfor
 import { AuthGuard } from '../../../infrastructure/guards/auth-basic.guard';
 import { ErrorResulter } from '../../../infrastructure/object-result/objcet-result';
 import { QueryPaginationResult } from '../../../infrastructure/types/query-sort.type';
+import { PaginationWithItems } from '../../../infrastructure/utils/createPagination';
 import { CurrentUser } from '../../auth/decorators/current-user.decorator';
-import { PaginationWithItems } from '../../common/types/output';
 import { PostQueryRepository } from '../../posts/repositories/post/post.query.repository';
 import { PostService } from '../../posts/services/post.service';
 import { PostInBlogUpdateType } from '../../posts/types/input';

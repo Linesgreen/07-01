@@ -10,7 +10,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const request = ctx.getRequest<Request>();
     const status = exception.getStatus();
     const errorMessage = exception.message || 'Ресурс не найден';
-    //TODO копать тут
+
     if (status === HttpStatus.NOT_FOUND) {
       response.status(status).json({
         statusCode: status,

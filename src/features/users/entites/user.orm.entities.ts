@@ -1,10 +1,10 @@
 import { add } from 'date-fns';
 import { BaseEntity, Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
-import { Comment_Orm } from '../../comments/entites/orm_comment';
-import { Comment_like_Orm } from '../../comments/entites/orm_comment_like';
-import { Post_like_Orm } from '../../posts/entites/orm_post.likes';
-import { Session_Orm } from '../../security/entites/orm_session';
+import { Comment_Orm } from '../../comments/entites/comment.orm.entities';
+import { Comment_like_Orm } from '../../comments/entites/comment-like.entities';
+import { Post_like_Orm } from '../../posts/entites/post-like.orm.entities';
+import { Session_Orm } from '../../security/entites/session.orm.entities';
 import { UserCreateData } from '../types/input';
 //Разобраться с флоу юзера
 @Entity()

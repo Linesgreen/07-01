@@ -4,9 +4,9 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 
 import { ErrorStatus, Result } from '../../../../infrastructure/object-result/objcet-result';
 import { QueryPaginationResult } from '../../../../infrastructure/types/query-sort.type';
+import { PaginationWithItems } from '../../../../infrastructure/utils/createPagination';
 import { CommentQueryRepository } from '../../../comments/repositories/comments/comment.query.repository';
 import { OutputCommentType } from '../../../comments/types/comments/output';
-import { PaginationWithItems } from '../../../common/types/output';
 import { PostRepository } from '../../repositories/post/post.repository';
 
 export class GetCommentsToPostWithLikeStatusCommand {

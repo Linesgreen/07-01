@@ -17,12 +17,12 @@ import { QueryPaginationPipe } from '../../../infrastructure/decorators/transfor
 import { JwtAuthGuard } from '../../../infrastructure/guards/jwt-auth.guard';
 import { ErrorResulter } from '../../../infrastructure/object-result/objcet-result';
 import { QueryPaginationResult } from '../../../infrastructure/types/query-sort.type';
+import { PaginationWithItems } from '../../../infrastructure/utils/createPagination';
 import { CurrentUser } from '../../auth/decorators/current-user.decorator';
 import { CommentQueryRepository } from '../../comments/repositories/comments/comment.query.repository';
 import { CreateCommentCommand } from '../../comments/service/useCase/create-comment.useCase';
 import { LikeCreateModel } from '../../comments/types/comments/input';
 import { OutputCommentType } from '../../comments/types/comments/output';
-import { PaginationWithItems } from '../../common/types/output';
 import { PostQueryRepository } from '../repositories/post/post.query.repository';
 import { AddLikeToPostCommand } from '../services/useCase/add-like.to.post.useSace';
 import { CommentCreateModel } from '../types/input';

@@ -1,4 +1,4 @@
-import { LikeStatus } from '../../../posts/types/likes/input';
+import { LikeStatus } from './input';
 
 export type OutputCommentType = {
   id: string;

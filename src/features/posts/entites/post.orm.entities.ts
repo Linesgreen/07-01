@@ -1,9 +1,9 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
-import { Blog_Orm } from '../../blogs/entites/orm_blogs';
-import { Comment_Orm } from '../../comments/entites/orm_comment';
-import { Post_like_Orm } from './orm_post.likes';
-import { PostCreateModel } from './post';
+import { Blog_Orm } from '../../blogs/entites/blog.orm.entities';
+import { Comment_Orm } from '../../comments/entites/comment.orm.entities';
+import { PostCreateModel } from '../types/input';
+import { Post_like_Orm } from './post-like.orm.entities';
 
 @Entity()
 export class Post_Orm {

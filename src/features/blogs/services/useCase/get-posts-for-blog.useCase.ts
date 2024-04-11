@@ -5,7 +5,7 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 
 import { ErrorStatus, Result } from '../../../../infrastructure/object-result/objcet-result';
 import { QueryPaginationResult } from '../../../../infrastructure/types/query-sort.type';
-import { PaginationWithItems } from '../../../common/types/output';
+import { PaginationWithItems } from '../../../../infrastructure/utils/createPagination';
 import { PostQueryRepository } from '../../../posts/repositories/post/post.query.repository';
 import { OutputPostType } from '../../../posts/types/output';
 import { BlogsRepository } from '../../repositories/blog.repository';

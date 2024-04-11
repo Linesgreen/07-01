@@ -6,10 +6,10 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
 import { QueryPaginationResult } from '../../../../infrastructure/types/query-sort.type';
-import { PaginationWithItems } from '../../../common/types/output';
-import { Comment_Orm } from '../../entites/orm_comment';
-import { Comment_like_Orm } from '../../entites/orm_comment_like';
-import { LikeStatusE } from '../../types/comments/input';
+import { PaginationWithItems } from '../../../../infrastructure/utils/createPagination';
+import { Comment_Orm } from '../../entites/comment.orm.entities';
+import { Comment_like_Orm } from '../../entites/comment-like.entities';
+import { LikeStatus } from '../../types/comments/input';
 import { OutputCommentType } from '../../types/comments/output';
 import { RawCommentType } from '../../types/comments/repo.types';
 
@@ -31,7 +31,7 @@ export class CommentQueryRepository {
           .select('COUNT(comment_like.id)')
           .from(Comment_like_Orm, 'comment_like')
           .where('comment_like.commentId = comment.id')
-          .andWhere('comment_like.likeStatus = :likeStatus', { likeStatus: LikeStatusE.Like })
+          .andWhere('comment_like.likeStatus = :likeStatus', { likeStatus: LikeStatus.Like })
           .groupBy('comment_like.commentId');
       }, 'likes_likeCount')
       .addSelect((qb1) => {
@@ -39,7 +39,7 @@ export class CommentQueryRepository {
           .select('COUNT(id)')
           .from(Comment_like_Orm, 'comment_like')
           .where('comment_like.commentId = comment.id')
-          .andWhere('comment_like.likeStatus = :dislikeStatus', { dislikeStatus: LikeStatusE.Dislike })
+          .andWhere('comment_like.likeStatus = :dislikeStatus', { dislikeStatus: LikeStatus.Dislike })
           .groupBy('comment_like.commentId');
       }, 'likes_dislikeCount')
       .addSelect(['comment.id', 'comment.content', 'comment.createdAt', 'comment.userId', 'user.login'])
@@ -68,7 +68,7 @@ export class CommentQueryRepository {
           .select('COUNT(comment_like.id)')
           .from(Comment_like_Orm, 'comment_like')
           .where('comment_like.commentId = comment.id')
-          .andWhere('comment_like.likeStatus = :likeStatus', { likeStatus: LikeStatusE.Like })
+          .andWhere('comment_like.likeStatus = :likeStatus', { likeStatus: LikeStatus.Like })
           .groupBy('comment_like.commentId');
       }, 'likes_likeCount')
       .addSelect((qb1) => {
@@ -76,7 +76,7 @@ export class CommentQueryRepository {
           .select('COUNT(id)')
           .from(Comment_like_Orm, 'comment_like')
           .where('comment_like.commentId = comment.id')
-          .andWhere('comment_like.likeStatus = :dislikeStatus', { dislikeStatus: LikeStatusE.Dislike })
+          .andWhere('comment_like.likeStatus = :dislikeStatus', { dislikeStatus: LikeStatus.Dislike })
           .groupBy('comment_like.commentId');
       }, 'likes_dislikeCount')
       .addSelect(['comment.id', 'comment.content', 'comment.createdAt', 'comment.userId', 'user.login'])
@@ -106,7 +106,7 @@ export class CommentQueryRepository {
       likesInfo: {
         likesCount: raw_comment?.likes_likeCount ? Number(raw_comment.likes_likeCount) : 0,
         dislikesCount: raw_comment?.likes_dislikeCount ? Number(raw_comment.likes_dislikeCount) : 0,
-        myStatus: raw_comment.likes_likeStatus ?? 'None',
+        myStatus: raw_comment.likes_likeStatus ?? LikeStatus.None,
       },
     };
   }

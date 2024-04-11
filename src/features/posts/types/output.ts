@@ -1,4 +1,4 @@
-import { LikeStatus } from './likes/input';
+import { LikeStatus } from '../../comments/types/comments/input';
 import { NewestLikeType } from './likes/output';
 
 export type ExtendedLikesInfoOutputType = {
@@ -18,22 +18,3 @@ export type OutputPostType = {
   createdAt: string;
   extendedLikesInfo: ExtendedLikesInfoOutputType;
 };
-
-export class PostPgDb {
-  id: number;
-  title: string;
-  shortDescription: string;
-  content: string;
-  blogId: number;
-  createdAt: Date;
-}
-
-export class PostPgWithBlogDataDb {
-  id: number;
-  title: string;
-  shortDescription: string;
-  content: string;
-  blogId: number;
-  blogName: string;
-  createdAt: Date;
-}

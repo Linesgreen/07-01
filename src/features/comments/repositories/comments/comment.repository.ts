@@ -5,23 +5,19 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { Comment_Orm } from '../../entites/orm_comment';
+import { Comment_Orm } from '../../entites/comment.orm.entities';
 
 @Injectable()
-export class CommentOrmRepository {
+export class CommentRepository {
   constructor(@InjectRepository(Comment_Orm) protected commentRepository: Repository<Comment_Orm>) {}
-  async addComment(comment: Comment_Orm): Promise<{ id: number }> {
-    console.log(comment);
-    const newComment = await this.commentRepository.save(comment);
-    return { id: newComment.id };
-  }
 
   async getById(id: number): Promise<Comment_Orm | null> {
     return this.commentRepository.findOneBy({ id: id });
   }
 
-  async update(comment: Comment_Orm): Promise<void> {
-    await this.commentRepository.update({ id: comment.id }, comment);
+  async save(comment: Comment_Orm): Promise<{ id: number }> {
+    await this.commentRepository.save(comment);
+    return { id: comment.id };
   }
 
   async deleteById(id: number): Promise<boolean> {

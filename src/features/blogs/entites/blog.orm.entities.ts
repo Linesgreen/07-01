@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-this-alias */
 import { BaseEntity, Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
-import { Post_Orm } from '../../posts/entites/orm_post';
+import { Post_Orm } from '../../posts/entites/post.orm.entities';
 import { BlogCreateModel } from '../types/input';
 
 @Entity({ name: 'blogs_orm' })

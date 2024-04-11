@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { ILike, Repository } from 'typeorm';
 
 import { QueryPaginationResult } from '../../../infrastructure/types/query-sort.type';
-import { PaginationWithItems } from '../../common/types/output';
+import { PaginationWithItems } from '../../../infrastructure/utils/createPagination';
 import { User_Orm } from '../entites/user.orm.entities';
 import { UserOutputType } from '../types/output';
 

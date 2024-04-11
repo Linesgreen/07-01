@@ -4,8 +4,7 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { Session_Orm } from '../entites/orm_session';
-import { Session } from '../entites/session';
+import { Session_Orm } from '../entites/session.orm.entities';
 
 export class SessionRepository {
   constructor(@InjectRepository(Session_Orm) protected sessionRepository: Repository<Session_Orm>) {}
@@ -21,23 +20,10 @@ export class SessionRepository {
     return session;
   }
 
-  async getByDeviceId(deviceId: string): Promise<Session | null> {
+  async getByDeviceId(deviceId: string): Promise<Session_Orm | null> {
     const session = await this.sessionRepository.findOneBy([{ deviceId, isActive: true }]);
     if (!session) return null;
-    return Session.fromDbToInstance(session);
-  }
-  //TODO через метод класса
-  async updateSession(session: Session): Promise<void> {
-    const entity = {
-      tokenKey: session.tokenKey,
-      issuedDate: session.issuedDate,
-      expiredDate: session.expiredDate,
-      title: session.title,
-      userId: session.userId,
-      ip: session.ip,
-      deviceId: session.deviceId,
-    };
-    await this.sessionRepository.update({ deviceId: session.deviceId }, entity);
+    return session;
   }
 
   async terminateSessionByDeviceIdAndUserId(deviceId: string, userId: number): Promise<void> {

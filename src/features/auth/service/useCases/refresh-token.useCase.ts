@@ -1,7 +1,7 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 
 import { ErrorStatus, Result } from '../../../../infrastructure/object-result/objcet-result';
-import { Session_Orm } from '../../../security/entites/orm_session';
+import { Session_Orm } from '../../../security/entites/session.orm.entities';
 import { SessionRepository } from '../../../security/repository/session.repository';
 import { AuthService } from '../auth.service';
 

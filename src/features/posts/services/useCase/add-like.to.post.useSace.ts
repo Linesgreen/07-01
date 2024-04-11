@@ -2,8 +2,8 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 
 import { ErrorStatus, Result } from '../../../../infrastructure/object-result/objcet-result';
-import { LikeStatusE } from '../../../comments/types/comments/input';
-import { Post_like_Orm } from '../../entites/orm_post.likes';
+import { LikeStatus } from '../../../comments/types/comments/input';
+import { Post_like_Orm } from '../../entites/post-like.orm.entities';
 import { PostLikeRepository } from '../../repositories/likes/post-likes.query.repository';
 import { PostRepository } from '../../repositories/post/post.repository';
 
@@ -11,7 +11,7 @@ export class AddLikeToPostCommand {
   constructor(
     public postId: number,
     public userId: number,
-    public likeStatus: LikeStatusE,
+    public likeStatus: LikeStatus,
   ) {}
 }
 
@@ -44,7 +44,7 @@ export class AddLikeToPostUseCase implements ICommandHandler<AddLikeToPostComman
     await this.postLikeRepository.save(newLike);
   }
 
-  private async updateLike(like: Post_like_Orm, likeStatus: LikeStatusE): Promise<void> {
+  private async updateLike(like: Post_like_Orm, likeStatus: LikeStatus): Promise<void> {
     like.updateLikeStatus(likeStatus);
     await this.postLikeRepository.save(like);
   }

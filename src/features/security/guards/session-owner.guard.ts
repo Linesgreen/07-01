@@ -1,6 +1,6 @@
 import { CanActivate, ExecutionContext, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 
-import { Session } from '../entites/session';
+import { Session_Orm } from '../entites/session.orm.entities';
 import { SessionRepository } from '../repository/session.repository';
 
 // Custom guard
@@ -13,15 +13,15 @@ export class SessionOwnerGuard implements CanActivate {
     const deviceId = request.params.id;
     const userId = request.user.id;
     await this.chekIsUUID(deviceId);
-    const targetSession: Session = await this.getSession(deviceId);
+    const targetSession = await this.getSession(deviceId);
     return this.chekCredentials(targetSession, userId);
   }
-  async getSession(deviceId: string): Promise<Session> {
+  async getSession(deviceId: string): Promise<Session_Orm> {
     const session = await this.sessionOrmRepository.getByDeviceId(deviceId);
     if (!session) throw new NotFoundException();
     return session;
   }
-  async chekCredentials(session: Session, userId: string): Promise<boolean> {
+  async chekCredentials(session: Session_Orm, userId: string): Promise<boolean> {
     if (session.userId !== Number(userId)) throw new ForbiddenException();
     return true;
   }

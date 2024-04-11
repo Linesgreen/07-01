@@ -2,9 +2,9 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 
 import { Result } from '../../../../infrastructure/object-result/objcet-result';
-import { Session_Orm } from '../../../security/entites/orm_session';
+import { Session_Orm } from '../../../security/entites/session.orm.entities';
 import { SessionRepository } from '../../../security/repository/session.repository';
-import { SessionCreateData } from '../../../security/types/commot.types';
+import { SessionCreateData } from '../../../security/types/comon.types';
 import { AuthService } from '../auth.service';
 
 export class UserLoginCommand {

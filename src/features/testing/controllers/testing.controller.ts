@@ -1,19 +1,18 @@
 import { Controller, Delete, HttpCode } from '@nestjs/common';
-import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
-import { Blog_Orm } from '../../blogs/entites/orm_blogs';
-import { Comment_Orm } from '../../comments/entites/orm_comment';
-import { Comment_like_Orm } from '../../comments/entites/orm_comment_like';
-import { Post_Orm } from '../../posts/entites/orm_post';
-import { Post_like_Orm } from '../../posts/entites/orm_post.likes';
-import { Session_Orm } from '../../security/entites/orm_session';
+import { Blog_Orm } from '../../blogs/entites/blog.orm.entities';
+import { Comment_Orm } from '../../comments/entites/comment.orm.entities';
+import { Comment_like_Orm } from '../../comments/entites/comment-like.entities';
+import { Post_Orm } from '../../posts/entites/post.orm.entities';
+import { Post_like_Orm } from '../../posts/entites/post-like.orm.entities';
+import { Session_Orm } from '../../security/entites/session.orm.entities';
 import { User_Orm } from '../../users/entites/user.orm.entities';
 
 @Controller('testing')
 export class TestingController {
   constructor(
-    @InjectDataSource() private dataSource: DataSource,
     @InjectRepository(User_Orm) protected userRepository: Repository<User_Orm>,
     @InjectRepository(Session_Orm) protected sessionRepository: Repository<Session_Orm>,
     @InjectRepository(Post_Orm) protected postRepository: Repository<Post_Orm>,
@@ -32,15 +31,6 @@ export class TestingController {
     await this.postRepository.delete({});
     await this.blogRepository.delete({});
     await this.userRepository.delete({});
-
-    await this.dataSource.query(`DELETE  FROM public.sessions CASCADE`);
-    await this.dataSource.query(`DELETE  FROM public.post_likes CASCADE`);
-    await this.dataSource.query(`DELETE  FROM public.comments_likes CASCADE`);
-    await this.dataSource.query(`DELETE  FROM public.comments CASCADE`);
-    await this.dataSource.query(`DELETE FROM public.users CASCADE`);
-    await this.dataSource.query(`DELETE FROM public.posts CASCADE`);
-    await this.dataSource.query(`DELETE FROM public.blogs CASCADE`);
-
     return;
   }
 }

@@ -3,7 +3,7 @@ import { BaseEntity, Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColu
 
 import { configService } from '../../../settings/config.service';
 import { User_Orm } from '../../users/entites/user.orm.entities';
-import { SessionCreateData } from '../types/commot.types';
+import { SessionCreateData } from '../types/comon.types';
 
 @Entity()
 export class Session_Orm extends BaseEntity {

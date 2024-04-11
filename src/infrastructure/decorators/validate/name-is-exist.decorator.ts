@@ -29,11 +29,11 @@ export function NameIsExist(property?: string, validationOptions?: ValidationOpt
 @ValidatorConstraint({ name: 'NameIsExist', async: false })
 @Injectable()
 export class NameIsExistConstraint implements ValidatorConstraintInterface {
-  constructor(protected postgreeUserRepository: UserRepository) {}
+  constructor(protected userRepository: UserRepository) {}
 
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   async validate(value: any, args: ValidationArguments) {
-    const user = await this.postgreeUserRepository.getByLoginOrEmail(value);
+    const user = await this.userRepository.getByLoginOrEmail(value);
     if (user) return false;
     return true;
   }

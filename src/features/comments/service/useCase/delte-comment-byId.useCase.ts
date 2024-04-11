@@ -1,7 +1,7 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 
 import { ErrorStatus, Result } from '../../../../infrastructure/object-result/objcet-result';
-import { CommentOrmRepository } from '../../repositories/comments/comment.repository';
+import { CommentRepository } from '../../repositories/comments/comment.repository';
 
 export class DeleteCommentByIdCommand {
   constructor(public commentId: number) {}
@@ -9,7 +9,7 @@ export class DeleteCommentByIdCommand {
 
 @CommandHandler(DeleteCommentByIdCommand)
 export class DeleteCommentByIdUseCase implements ICommandHandler<DeleteCommentByIdCommand> {
-  constructor(protected commentsRepository: CommentOrmRepository) {}
+  constructor(protected commentsRepository: CommentRepository) {}
 
   async execute({ commentId }: DeleteCommentByIdCommand): Promise<Result<string>> {
     const result = await this.commentsRepository.deleteById(commentId);

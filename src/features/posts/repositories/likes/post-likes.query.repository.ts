@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { Post_like_Orm } from '../../entites/orm_post.likes';
+import { Post_like_Orm } from '../../entites/post-like.orm.entities';
 
 @Injectable()
 export class PostLikeRepository {

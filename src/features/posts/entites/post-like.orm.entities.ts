@@ -1,8 +1,8 @@
 import { BaseEntity, Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
-import { LikeStatusE } from '../../comments/types/comments/input';
+import { LikeStatus } from '../../comments/types/comments/input';
 import { User_Orm } from '../../users/entites/user.orm.entities';
-import { Post_Orm } from './orm_post';
+import { Post_Orm } from './post.orm.entities';
 
 @Entity()
 export class Post_like_Orm extends BaseEntity {
@@ -26,10 +26,10 @@ export class Post_like_Orm extends BaseEntity {
   @Column()
   userId: number;
 
-  @Column({ type: 'enum', enum: LikeStatusE })
-  likeStatus: LikeStatusE;
+  @Column({ type: 'enum', enum: LikeStatus })
+  likeStatus: LikeStatus;
 
-  static createPostLikeModel(likeData: { postId: number; userId: number; likeStatus: LikeStatusE }): Post_like_Orm {
+  static createPostLikeModel(likeData: { postId: number; userId: number; likeStatus: LikeStatus }): Post_like_Orm {
     const newLike = new Post_like_Orm();
     newLike.postId = likeData.postId;
     newLike.userId = likeData.userId;
@@ -38,7 +38,7 @@ export class Post_like_Orm extends BaseEntity {
     return newLike;
   }
 
-  updateLikeStatus(likeStatus: LikeStatusE): void {
+  updateLikeStatus(likeStatus: LikeStatus): void {
     this.likeStatus = likeStatus;
   }
 }

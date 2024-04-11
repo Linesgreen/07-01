@@ -2,8 +2,8 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 
 import { ErrorStatus, Result } from '../../../../infrastructure/object-result/objcet-result';
 import { PostRepository } from '../../../posts/repositories/post/post.repository';
-import { Comment_Orm } from '../../entites/orm_comment';
-import { CommentOrmRepository } from '../../repositories/comments/comment.repository';
+import { Comment_Orm } from '../../entites/comment.orm.entities';
+import { CommentRepository } from '../../repositories/comments/comment.repository';
 
 export class CreateCommentCommand {
   constructor(
@@ -16,7 +16,7 @@ export class CreateCommentCommand {
 @CommandHandler(CreateCommentCommand)
 export class CreateCommentUseCase implements ICommandHandler<CreateCommentCommand> {
   constructor(
-    protected commentRepository: CommentOrmRepository,
+    protected commentRepository: CommentRepository,
     protected postRepository: PostRepository,
   ) {}
   async execute({ userId, postId, content }: CreateCommentCommand): Promise<Result<string | { id: number }>> {
@@ -25,7 +25,7 @@ export class CreateCommentUseCase implements ICommandHandler<CreateCommentComman
     const targetPost = await this.postRepository.findById(postId);
     if (!targetPost) return Result.Err(ErrorStatus.NOT_FOUND, `Post with id ${postId} not found`);
 
-    const commentId = await this.commentRepository.addComment(newCommentToDB);
+    const commentId = await this.commentRepository.save(newCommentToDB);
     return Result.Ok(commentId);
   }
 }

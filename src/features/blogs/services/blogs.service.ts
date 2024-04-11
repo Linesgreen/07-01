@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 
 import { ErrorStatus, Result } from '../../../infrastructure/object-result/objcet-result';
-import { Blog_Orm } from '../entites/orm_blogs';
+import { Blog_Orm } from '../entites/blog.orm.entities';
 import { BlogsRepository } from '../repositories/blog.repository';
 import { BlogCreateModel } from '../types/input';
 
@@ -11,7 +11,7 @@ export class BlogsService {
 
   async createBlog(blogData: BlogCreateModel): Promise<Result<{ id: number }>> {
     const newBlog = Blog_Orm.createBlogModel(blogData);
-    const blogId = await this.blogRepository.addBlog(newBlog);
+    const blogId = await this.blogRepository.save(newBlog);
     return Result.Ok(blogId);
   }
 

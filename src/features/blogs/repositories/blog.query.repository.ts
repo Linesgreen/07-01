@@ -4,13 +4,14 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { ILike, Repository } from 'typeorm';
 
 import { QueryPaginationResult } from '../../../infrastructure/types/query-sort.type';
-import { PaginationWithItems } from '../../common/types/output';
-import { Blog_Orm } from '../entites/orm_blogs';
+import { PaginationWithItems } from '../../../infrastructure/utils/createPagination';
+import { Blog_Orm } from '../entites/blog.orm.entities';
 import { OutputBlogType } from '../types/output';
 
 @Injectable()
 export class BlogsQueryRepository {
   constructor(@InjectRepository(Blog_Orm) protected blogRepository: Repository<Blog_Orm>) {}
+
   async getById(id: number): Promise<OutputBlogType | null> {
     const blog = await this.blogRepository.findOne({ where: { id, isActive: true } });
     return blog ? this._mapToOutputBlogType(blog) : null;
@@ -27,6 +28,7 @@ export class BlogsQueryRepository {
       .take(sortData.pageSize)
       .skip(skip)
       .getMany();
+
     const totalCount = await this.blogRepository
       .createQueryBuilder()
       .where({ name: ILike(`%${searchNameTerm}%`), isActive: true })

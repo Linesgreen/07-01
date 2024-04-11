@@ -15,17 +15,17 @@ import { blogsProviders, blogsUseCases } from './features/blogs';
 import { BlogsController } from './features/blogs/controllers/blogs.controller';
 import { SaBlogsController } from './features/blogs/controllers/sa.blogs.controller';
 import { BlogIsExistConstraint } from './features/blogs/decorators/blog-is-exist.decorator';
-import { Blog_Orm } from './features/blogs/entites/orm_blogs';
+import { Blog_Orm } from './features/blogs/entites/blog.orm.entities';
 import { commentProviders, commentUseCases } from './features/comments';
 import { CommentsController } from './features/comments/controller/comments.controller';
-import { Comment_Orm } from './features/comments/entites/orm_comment';
-import { Comment_like_Orm } from './features/comments/entites/orm_comment_like';
+import { Comment_Orm } from './features/comments/entites/comment.orm.entities';
+import { Comment_like_Orm } from './features/comments/entites/comment-like.entities';
 import { postProviders, postsUseCases } from './features/posts';
 import { PostsController } from './features/posts/controllers/posts.controller';
-import { Post_Orm } from './features/posts/entites/orm_post';
-import { Post_like_Orm } from './features/posts/entites/orm_post.likes';
+import { Post_Orm } from './features/posts/entites/post.orm.entities';
+import { Post_like_Orm } from './features/posts/entites/post-like.orm.entities';
 import { SecurityController } from './features/security/controllers/security.controller';
-import { Session_Orm } from './features/security/entites/orm_session';
+import { Session_Orm } from './features/security/entites/session.orm.entities';
 import { TestingController } from './features/testing/controllers/testing.controller';
 import { userProviders } from './features/users';
 import { SaUserController } from './features/users/controllers/sa.user.controller';
@@ -34,7 +34,6 @@ import { UserRepository } from './features/users/repositories/user.repository';
 import { QueryPaginationPipe } from './infrastructure/decorators/transform/query-pagination.pipe';
 import { ConfCodeIsValidConstraint } from './infrastructure/decorators/validate/conf-code.decorator';
 import { EmailIsConformedConstraint } from './infrastructure/decorators/validate/email-is-conformed.decorator';
-import { LikeStatusConstraint } from './infrastructure/decorators/validate/like-status.decorator';
 import { NameIsExistConstraint } from './infrastructure/decorators/validate/name-is-exist.decorator';
 import { RecoveryCodeIsValidConstraint } from './infrastructure/decorators/validate/password-recovery-code.decorator';
 import { PostIsExistConstraint } from './infrastructure/decorators/validate/post-is-exist.decorator';
@@ -42,7 +41,6 @@ import { PayloadFromJwtMiddleware } from './infrastructure/middleware/payload-fr
 import { CookieJwtStrategy } from './infrastructure/strategies/cookie.jwt.strategy';
 import { JwtStrategy } from './infrastructure/strategies/jwt.strategy';
 import { LocalStrategy } from './infrastructure/strategies/local.strategy';
-import { LikesToMapperManager } from './infrastructure/utils/likes-to-map-manager';
 import { MailModule } from './mail/mail.module';
 import { configService } from './settings/config.service';
 
@@ -50,7 +48,6 @@ const strategies = [LocalStrategy, JwtStrategy, CookieJwtStrategy];
 const decorators = [
   NameIsExistConstraint,
   EmailIsConformedConstraint,
-  LikeStatusConstraint,
   ConfCodeIsValidConstraint,
   PostIsExistConstraint,
   BlogIsExistConstraint,
@@ -100,7 +97,6 @@ const decorators = [
     ...commentUseCases,
     ...postsUseCases,
     GetInformationAboutUserCase,
-    LikesToMapperManager,
     ...strategies,
     ...decorators,
     QueryPaginationPipe,

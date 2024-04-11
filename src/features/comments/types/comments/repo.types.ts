@@ -1,4 +1,4 @@
-import { LikeStatusE } from './input';
+import { LikeStatus } from './input';
 
 export type RawCommentType = {
   comment_id: number;
@@ -6,7 +6,7 @@ export type RawCommentType = {
   comment_createdAt: Date;
   comment_userId: number;
   user_login: string;
-  likes_likeStatus: LikeStatusE | null;
+  likes_likeStatus: LikeStatus | null;
   likes_likeCount: null | number;
   likes_dislikeCount: null | number;
 };
