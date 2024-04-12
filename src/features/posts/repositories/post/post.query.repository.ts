@@ -1,5 +1,5 @@
 /* eslint-disable no-underscore-dangle,@typescript-eslint/no-explicit-any,@typescript-eslint/explicit-function-return-type,@typescript-eslint/ban-ts-comment */
-// noinspection ES6ShorthandObjectProperty,JSUnusedLocalSymbols,JSUnresolvedReference
+// noinspection ES6ShorthandObjectProperty,JSUnusedLocalSymbols,JSUnresolvedReference,UnnecessaryLocalVariableJS
 
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -10,6 +10,8 @@ import { PaginationWithItems } from '../../../../infrastructure/utils/createPagi
 import { LikeStatus } from '../../../comments/types/comments/input';
 import { Post_Orm } from '../../entites/post.orm.entities';
 import { Post_like_Orm } from '../../entites/post-like.orm.entities';
+import { LastLike, LastLikeFromDB, LikeCount } from '../../types/likes/commont.types';
+import { NewestLikeType } from '../../types/likes/output';
 import { OutputPostType } from '../../types/output';
 
 @Injectable()
@@ -45,7 +47,7 @@ export class PostQueryRepository {
     const lastThreeLikes = await this._getLastThreeLikes(postIds);
     const likesStatuses = await this.postLikeRepository.findBy({ postId: In(postIds), userId: userId ?? 0 });
     const likesCount = await this._getLikeCount(postIds);
-    const postDto = this._mapToOutput1(postWithBlogName, lastThreeLikes, likesStatuses, likesCount);
+    const postDto = this._mapToOutput(postWithBlogName, lastThreeLikes, likesStatuses, likesCount);
     return postDto[0];
   }
 
@@ -83,7 +85,7 @@ export class PostQueryRepository {
     const likesCount = await this._getLikeCount(postIds);
 
     const totalCount = await this.postRepository.createQueryBuilder().where({ isActive: true, blogId }).getCount();
-    const postDto = this._mapToOutput1(postsWithBlogName, lastThreeLikes, likeStatuses, likesCount);
+    const postDto = this._mapToOutput(postsWithBlogName, lastThreeLikes, likeStatuses, likesCount);
 
     return new PaginationWithItems(sortData.pageNumber, sortData.pageSize, totalCount, postDto);
   }
@@ -125,58 +127,40 @@ export class PostQueryRepository {
 
     const lastThreeLikes = await this._getLastThreeLikes(postIds);
 
-    const likesStatuses = await this.postLikeRepository.findBy({ postId: In(postIds), userId: userId ?? 0 });
+    const likeStatuses = await this.postLikeRepository.findBy({ postId: In(postIds), userId: userId ?? 0 });
     const likesCount = await this._getLikeCount(postIds);
 
     const totalCount = await this.postRepository.createQueryBuilder().where({ isActive: true }).getCount();
-    const postDto = this._mapToOutput1(postsWithBlogName, lastThreeLikes, likesStatuses, likesCount);
+    const postDto = this._mapToOutput(postsWithBlogName, lastThreeLikes, likeStatuses, likesCount);
     return new PaginationWithItems(sortData.pageNumber, sortData.pageSize, totalCount, postDto);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  //TODO добавить типы
-  private _mapToOutput1(
+  private _mapToOutput(
     posts: Post_Orm[],
-    lastThreeLikes: any[],
-    likeStatuse: Post_like_Orm[],
-    likesCount: any[],
-  ): any {
-    //Подготавливаем лайки
-    const likes_collection = new Map();
-    //TODO reduce
-    lastThreeLikes.forEach((l) => {
-      if (likes_collection.has(l.postId)) {
-        const like = likes_collection.get(l.postId);
-        like.unshift(l);
-        likes_collection.set(l.postId, like);
-        return;
-      }
-      likes_collection.set(l.postId, [l]);
-    });
-    //Подготавливаем подсчет лайков
-    const likes_count = new Map();
-    likesCount.forEach((lc) => {
-      likes_count.set(lc.postId, lc);
-    });
+    lastThreeLikes: LastLike[],
+    likeStatus: Post_like_Orm[],
+    likesCount: LikeCount[],
+  ): OutputPostType[] {
+    const likeCollection = lastThreeLikes.reduce((acc, l) => {
+      const newLike = {
+        addedAt: l.addedAt,
+        userId: l.userId,
+        login: l.login,
+      };
+      acc.has(l.postId) ? acc.get(l.postId)?.unshift(newLike) : acc.set(l.postId, [newLike]);
+      return acc;
+    }, new Map<number, NewestLikeType[]>());
 
-    //Подготавлиаем статс лайка для конкретного пользователя
-    const user_statuse = new Map();
-    likeStatuse.forEach((lc) => {
-      user_statuse.set(lc.postId, lc.likeStatus);
-    });
+    const likesCountMap = new Map(likesCount.map((lc) => [lc.postId, lc]));
+
+    const userStatusMap = new Map(likeStatus.map((lc) => [lc.postId, lc.likeStatus]));
 
     const postsDto = posts.map((post) => {
-      let newestLikes = [];
-      //TODO переделать ( сделать мапинг внутри запроса сразу)
-      if (likes_collection.has(post.id)) {
-        newestLikes = likes_collection.get(post.id).map((l) => {
-          return {
-            addedAt: l.createdAt.toISOString(),
-            userId: l.userId.toString(),
-            login: l.login,
-          };
-        });
-      }
+      const postId = post.id;
+      const newestLikes = likeCollection.get(postId) ?? [];
+      const count = likesCountMap.get(postId);
+      const userLikeStatus = userStatusMap.get(postId) ?? LikeStatus.None;
+
       return {
         id: post.id.toString(),
         title: post.title,
@@ -186,18 +170,19 @@ export class PostQueryRepository {
         blogName: post.blog.name,
         createdAt: post.createdAt.toISOString(),
         extendedLikesInfo: {
-          likesCount: likes_count.get(post.id)?.likesCount ?? 0,
-          dislikesCount: likes_count.get(post.id)?.dislikesCount ?? 0,
-          myStatus: user_statuse.get(post.id) ?? LikeStatus.None,
+          likesCount: count?.likesCount ?? 0,
+          dislikesCount: count?.dislikesCount ?? 0,
+          myStatus: userLikeStatus,
           newestLikes: newestLikes,
         },
       };
     });
+
     return postsDto;
   }
 
-  private async _getLastThreeLikes(postIds: number[]) {
-    return this.postLikeRepository
+  private async _getLastThreeLikes(postIds: number[]): Promise<LastLike[]> {
+    const lastThreeLikes: LastLikeFromDB[] = await this.postLikeRepository
       .createQueryBuilder('likes')
       .select('likes.*')
       .addSelect('likes_with_rn.rn')
@@ -217,6 +202,15 @@ export class PostQueryRepository {
       .leftJoin('user_orm', 'user', 'user.id = likes."userId"')
       .where('likes_with_rn.rn <= 3')
       .getRawMany();
+
+    return lastThreeLikes.map((l) => {
+      return {
+        postId: l.postId,
+        addedAt: l.createdAt.toISOString(),
+        userId: l.userId.toString(),
+        login: l.login.toString(),
+      };
+    });
   }
 
   private async _getLikeCount(postIds: number[]) {
@@ -228,7 +222,7 @@ export class PostQueryRepository {
       .where('likes.postId IN (:...postIds)', { postIds })
       .groupBy('likes.postId')
       .getRawMany();
-    console.log(likes);
+
     return likes;
   }
 }
