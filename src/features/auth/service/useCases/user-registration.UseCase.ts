@@ -1,5 +1,7 @@
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import { CommandHandler } from '@nestjs/cqrs';
+import { DataSource, EntityManager } from 'typeorm';
 
+import { TransactionalCommandHandler } from '../../../../infrastructure/abstract-classes/transaction-commandHandler.abstract';
 import { ErrorStatus, Result } from '../../../../infrastructure/object-result/objcet-result';
 import { MailService } from '../../../../mail/mail.service';
 import { UserRepository } from '../../../users/repositories/user.repository';
@@ -11,17 +13,20 @@ export class UserRegistrationCommand {
 }
 
 @CommandHandler(UserRegistrationCommand)
-export class UserRegistrationUseCase implements ICommandHandler<UserRegistrationCommand> {
+export class UserRegistrationUseCase extends TransactionalCommandHandler<UserRegistrationCommand> {
   constructor(
     protected userService: UserService,
     protected mailService: MailService,
     private userOrmRepository: UserRepository,
-  ) {}
+    dataSource: DataSource,
+  ) {
+    super(dataSource);
+  }
 
-  async execute(command: UserRegistrationCommand): Promise<Result<string>> {
+  async handle(command: UserRegistrationCommand, entityManager: EntityManager): Promise<Result<string>> {
     const { email, login } = command.userData;
 
-    const createResult = await this.userService.createUser(command.userData);
+    const createResult = await this.userService.createUser(command.userData, entityManager);
 
     const userId = createResult.value.id;
     const user = await this.userOrmRepository.getById(userId);

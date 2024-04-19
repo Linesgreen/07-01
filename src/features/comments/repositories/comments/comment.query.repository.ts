@@ -89,7 +89,7 @@ export class CommentQueryRepository {
     console.log(comments);
     if (!comments.length) return null;
     const totalCount = await this.commentRepository.createQueryBuilder().where({ isActive: true, postId }).getCount();
-    //TODO показать прикалдес
+
     const commentsDto = comments.map((c) => this._mapToOutputCommentType(c));
     return new PaginationWithItems(sortData.pageNumber, sortData.pageSize, totalCount, commentsDto);
   }

@@ -1,5 +1,7 @@
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import { CommandHandler } from '@nestjs/cqrs';
+import { DataSource, EntityManager } from 'typeorm';
 
+import { TransactionalCommandHandler } from '../../../../infrastructure/abstract-classes/transaction-commandHandler.abstract';
 import { ErrorStatus, Result } from '../../../../infrastructure/object-result/objcet-result';
 import { Session_Orm } from '../../../security/entites/session.orm.entities';
 import { SessionRepository } from '../../../security/repository/session.repository';
@@ -13,13 +15,19 @@ export class RefreshTokenCommand {
 }
 
 @CommandHandler(RefreshTokenCommand)
-export class RefreshTokenUseCase implements ICommandHandler<RefreshTokenCommand> {
+export class RefreshTokenUseCase extends TransactionalCommandHandler<RefreshTokenCommand> {
   constructor(
     protected sessionRepository: SessionRepository,
     protected authService: AuthService,
-  ) {}
+    dataSource: DataSource,
+  ) {
+    super(dataSource);
+  }
 
-  async execute(command: RefreshTokenCommand): Promise<Result<{ token: string; refreshToken: string } | string>> {
+  async handle(
+    command: RefreshTokenCommand,
+    entityManager: EntityManager,
+  ): Promise<Result<{ token: string; refreshToken: string } | string>> {
     const { userId, tokenKey } = command;
 
     const session = await this.findSession(userId, tokenKey);
@@ -28,7 +36,7 @@ export class RefreshTokenUseCase implements ICommandHandler<RefreshTokenCommand>
     const deviceId = session.deviceId;
     const newTokenKey = crypto.randomUUID();
 
-    await this.updateAndSaveSession(session, newTokenKey);
+    await this.updateAndSaveSession(session, newTokenKey, entityManager);
     const { token, refreshToken } = await this.authService.generateTokenPair(userId, newTokenKey, deviceId);
     return Result.Ok({ token, refreshToken });
   }
@@ -39,8 +47,8 @@ export class RefreshTokenUseCase implements ICommandHandler<RefreshTokenCommand>
     return session;
   }
 
-  async updateAndSaveSession(session: Session_Orm, newTokenKey: string): Promise<void> {
+  async updateAndSaveSession(session: Session_Orm, newTokenKey: string, entityManager: EntityManager): Promise<void> {
     session.updateSession(newTokenKey);
-    await this.sessionRepository.save(session);
+    await this.sessionRepository.save(session, entityManager);
   }
 }

@@ -16,9 +16,11 @@ export class UpdateCommentUseCase implements ICommandHandler<UpdateCommentComman
 
   async execute({ commentId, content }: UpdateCommentCommand): Promise<Result<string>> {
     const comment = await this.commentsRepository.getById(commentId);
+
     if (!comment) return Result.Err(ErrorStatus.NOT_FOUND, `Comment with id ${commentId} not found`);
 
     comment.update({ content });
+
     await this.commentsRepository.save(comment);
     return Result.Ok('Comment updated');
   }

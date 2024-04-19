@@ -1,5 +1,7 @@
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import { CommandHandler } from '@nestjs/cqrs';
+import { DataSource, EntityManager } from 'typeorm';
 
+import { TransactionalCommandHandler } from '../../../../infrastructure/abstract-classes/transaction-commandHandler.abstract';
 import { ErrorStatus, Result } from '../../../../infrastructure/object-result/objcet-result';
 import { MailService } from '../../../../mail/mail.service';
 import { UserRepository } from '../../../users/repositories/user.repository';
@@ -10,15 +12,18 @@ export class NewPasswordRequestCommand {
 }
 
 @CommandHandler(NewPasswordRequestCommand)
-export class NewPasswordRequestUseCase implements ICommandHandler<NewPasswordRequestCommand> {
+export class NewPasswordRequestUseCase extends TransactionalCommandHandler<NewPasswordRequestCommand> {
   constructor(
     protected mailService: MailService,
     protected userRepository: UserRepository,
     protected authService: AuthService,
-  ) {}
+    dataSource: DataSource,
+  ) {
+    super(dataSource);
+  }
 
-  async execute({ email }: NewPasswordRequestCommand): Promise<Result<string>> {
-    const existResult = await this.chekUserIsExist(email);
+  async handle({ email }: NewPasswordRequestCommand, entityManager: EntityManager): Promise<Result<string>> {
+    const existResult = await this.chekUserIsExist(email, entityManager);
     if (!existResult) return Result.Ok('user not found');
 
     const passwordRecoveryToken = await this.authService.createJwt({ email }, '3600');
@@ -26,8 +31,8 @@ export class NewPasswordRequestUseCase implements ICommandHandler<NewPasswordReq
     return Result.Ok('email sended');
   }
 
-  private async chekUserIsExist(email: string): Promise<boolean> {
-    const result = await this.userRepository.getByLoginOrEmail(email);
+  private async chekUserIsExist(email: string, entityManager: EntityManager): Promise<boolean> {
+    const result = await this.userRepository.getByLoginOrEmail(email, entityManager);
     if (!result) {
       console.warn('User with email ' + email + ' not found');
       return false;

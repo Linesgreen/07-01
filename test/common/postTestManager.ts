@@ -3,7 +3,7 @@ import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 
 import { PostToBlogCreateModel } from '../../src/features/blogs/types/input';
-import { PostCreateModel } from '../../src/features/posts/entites/post';
+import { PostCreateModel } from '../../src/features/posts/types/input';
 
 export class PostTestManager {
   public adminData: {

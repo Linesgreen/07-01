@@ -14,7 +14,7 @@ export class AuthService {
   ): Promise<{ token: string; refreshToken: string }> {
     const tokenExpirationTime = configService.getTokenExp();
     const refreshTokenExpirationTime = configService.getRefreshTokenExp();
-    const token = await this.createJwt({ userId }, tokenExpirationTime);
+    const token = await this.createJwt({ userId, deviceId }, tokenExpirationTime);
     const refreshToken = await this.createJwt({ userId, tokenKey, deviceId }, refreshTokenExpirationTime);
     return { token, refreshToken };
   }

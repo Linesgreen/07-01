@@ -31,6 +31,7 @@ import { userProviders } from './features/users';
 import { SaUserController } from './features/users/controllers/sa.user.controller';
 import { User_Orm } from './features/users/entites/user.orm.entities';
 import { UserRepository } from './features/users/repositories/user.repository';
+import { DeleteUserUseCase } from './features/users/services/useCase/delete-user.useCase';
 import { QueryPaginationPipe } from './infrastructure/decorators/transform/query-pagination.pipe';
 import { ConfCodeIsValidConstraint } from './infrastructure/decorators/validate/conf-code.decorator';
 import { EmailIsConformedConstraint } from './infrastructure/decorators/validate/email-is-conformed.decorator';
@@ -96,6 +97,7 @@ const decorators = [
     ...blogsUseCases,
     ...commentUseCases,
     ...postsUseCases,
+    DeleteUserUseCase,
     GetInformationAboutUserCase,
     ...strategies,
     ...decorators,

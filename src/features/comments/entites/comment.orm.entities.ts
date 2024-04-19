@@ -1,4 +1,4 @@
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { BaseEntity, Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 import { Blog_Orm } from '../../blogs/entites/blog.orm.entities';
 import { Post_Orm } from '../../posts/entites/post.orm.entities';
@@ -8,7 +8,7 @@ import { CommentUpdateModel } from '../types/comments/input';
 import { Comment_like_Orm } from './comment-like.entities';
 
 @Entity()
-export class Comment_Orm {
+export class Comment_Orm extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 

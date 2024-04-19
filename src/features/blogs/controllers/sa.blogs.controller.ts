@@ -71,8 +71,11 @@ export class SaBlogsController {
   @Post('')
   async createBlog(@Body() blogCreateData: BlogCreateModel): Promise<OutputBlogType> {
     const result = await this.blogsService.createBlog(blogCreateData);
+
     const blogId = result.value.id;
+
     const blog = await this.blogQueryRepository.getById(blogId);
+
     if (!blog) throw new HttpException('Blog create error', 500);
     return blog;
   }
@@ -84,9 +87,13 @@ export class SaBlogsController {
     @Body() postData: PostToBlogCreateModel,
   ): Promise<OutputPostType> {
     const result = await this.postService.createPost({ ...postData, blogId });
+
     if (result.isFailure()) ErrorResulter.proccesError(result);
+
     const { id: postId } = result.value as { id: number };
+
     const post = await this.postQueryRepository.findById(postId, null);
+
     if (!post) throw new HttpException('Post create error', 500);
     return post;
   }

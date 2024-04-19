@@ -54,8 +54,6 @@ export class AuthController {
     return { accessToken: tokenPair.token };
   }
 
-  //TODO обсудить весь флоу
-  // Метод для регистрации нового пользователя
   @Post('registration')
   @HttpCode(204)
   async userRegistration(@Body() registrationData: UserRegistrationModel): Promise<void> {

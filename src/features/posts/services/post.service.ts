@@ -38,6 +38,7 @@ export class PostService {
   }
   async deletePost(postId: number, blogId: number): Promise<Result<string>> {
     const blog = await this.blogRepository.getById(blogId);
+
     if (!blog) return Result.Err(ErrorStatus.NOT_FOUND, `Blog ${blogId} Not Found`);
 
     const post = await this.postRepository.findById(postId);
