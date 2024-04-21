@@ -1,5 +1,6 @@
 /* eslint-disable no-underscore-dangle */
 import { Injectable } from '@nestjs/common';
+import { EntityManager } from 'typeorm';
 
 import { ErrorStatus, Result } from '../../../infrastructure/object-result/objcet-result';
 import { SessionRepository } from '../repository/session.repository';
@@ -14,8 +15,8 @@ export class SessionService {
     if (chekResult) return Result.Err(ErrorStatus.SERVER_ERROR, 'Session not terminated');
     return Result.Ok('Session terminated');
   }
-  async terminateAllSession(userId: number): Promise<void> {
-    await this.sessionRepository.terminateAllSessionByUserId(userId);
+  async terminateAllSession(userId: number, entityManager?: EntityManager): Promise<void> {
+    await this.sessionRepository.terminateAllSessionByUserId(userId, entityManager);
   }
   async terminateSessionByDeviceIdAndUserId(deviceId: string, userId: number): Promise<Result<string>> {
     await this.sessionRepository.terminateSessionByDeviceIdAndUserId(deviceId, userId);

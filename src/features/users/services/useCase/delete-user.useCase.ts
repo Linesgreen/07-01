@@ -1,6 +1,6 @@
 /* eslint-disable no-underscore-dangle */
 import { CommandHandler } from '@nestjs/cqrs';
-import { DataSource } from 'typeorm';
+import { DataSource, EntityManager } from 'typeorm';
 
 import { TransactionalCommandHandler } from '../../../../infrastructure/abstract-classes/transaction-commandHandler.abstract';
 import { ErrorStatus, Result } from '../../../../infrastructure/object-result/objcet-result';
@@ -21,15 +21,15 @@ export class DeleteUserUseCase extends TransactionalCommandHandler<DeleteUserCom
     super(dataSource);
   }
 
-  protected async handle({ userId }: DeleteUserCommand): Promise<Result<string>> {
-    const userIsExist = await this.userRepository.checkIsExitsById(userId);
+  protected async handle({ userId }: DeleteUserCommand, entityManager: EntityManager): Promise<Result<string>> {
+    const userIsExist = await this.userRepository.checkIsExitsById(userId, entityManager);
     if (!userIsExist) return Result.Err(ErrorStatus.NOT_FOUND, `User ${userId} not found`);
 
     // Деактивация всех сессий пользователя
-    await this.sessionService.terminateAllSession(userId);
+    await this.sessionService.terminateAllSession(userId, entityManager);
     // Отметка пользователя как удаленного
 
-    await this.userRepository.deleteById(userId);
+    await this.userRepository.deleteById(userId, entityManager);
 
     return Result.Ok(`User ${userId} deleted`);
   }

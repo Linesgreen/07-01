@@ -13,12 +13,11 @@ export abstract class TransactionalCommandHandler<C extends ICommand> implements
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
-    const entityManager = queryRunner.connection.createEntityManager();
+    const entityManager = queryRunner.manager;
 
     try {
       const result = await this.handle(command, entityManager);
-      await queryRunner.rollbackTransaction();
-      //await queryRunner.commitTransaction();
+      await queryRunner.commitTransaction();
       return result;
     } catch (error) {
       await queryRunner.rollbackTransaction();
