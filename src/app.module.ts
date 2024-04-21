@@ -42,6 +42,7 @@ import { PayloadFromJwtMiddleware } from './infrastructure/middleware/payload-fr
 import { CookieJwtStrategy } from './infrastructure/strategies/cookie.jwt.strategy';
 import { JwtStrategy } from './infrastructure/strategies/jwt.strategy';
 import { LocalStrategy } from './infrastructure/strategies/local.strategy';
+import { TransactionHelper } from './infrastructure/TransactionHelper/transaction-helper';
 import { MailModule } from './mail/mail.module';
 import { configService } from './settings/config.service';
 
@@ -103,6 +104,7 @@ const decorators = [
     ...decorators,
     QueryPaginationPipe,
     UserRepository,
+    TransactionHelper,
   ],
 })
 export class AppModule implements NestModule {

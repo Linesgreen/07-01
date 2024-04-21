@@ -16,7 +16,8 @@ import { CommandBus } from '@nestjs/cqrs';
 import { CommentOwnerGuard } from '../../../infrastructure/guards/comment-owner.guard';
 import { JwtAuthGuard } from '../../../infrastructure/guards/jwt-auth.guard';
 import { ErrorResulter } from '../../../infrastructure/object-result/objcet-result';
-import { CurrentUser } from '../../auth/decorators/current-user.decorator';
+import { TransactionHelper } from '../../../infrastructure/TransactionHelper/transaction-helper';
+import { CurrentUserId } from '../../auth/decorators/current-user.decorator';
 import { CommentQueryRepository } from '../repositories/comments/comment.query.repository';
 import { AddLikeToCommentCommand } from '../service/useCase/add-like.useCase';
 import { DeleteCommentByIdCommand } from '../service/useCase/delte-comment-byId.useCase';
@@ -29,11 +30,12 @@ export class CommentsController {
   constructor(
     private commandBus: CommandBus,
     private commentQueryRepository: CommentQueryRepository,
+    private readonly transactionHelper: TransactionHelper,
   ) {}
 
   @Get(':commentId')
   async getCommentById(
-    @CurrentUser() userId: number | null,
+    @CurrentUserId() userId: number | null,
     @Param('commentId', ParseIntPipe) commentId: number,
   ): Promise<OutputCommentType> {
     const comment = await this.commentQueryRepository.findById(commentId, userId);
@@ -48,8 +50,10 @@ export class CommentsController {
     @Param('commentId', ParseIntPipe) commentId: number,
     @Body() { content }: CommentUpdateModel,
   ): Promise<void> {
-    const result = await this.commandBus.execute(new UpdateCommentCommand(commentId, content));
-    if (result.isFailure()) ErrorResulter.proccesError(result);
+    return this.transactionHelper.doTransactional(async (): Promise<void> => {
+      const result = await this.commandBus.execute(new UpdateCommentCommand(commentId, content));
+      if (result.isFailure()) ErrorResulter.proccesError(result);
+    });
   }
 
   @Put('/:commentId/like-status')
@@ -58,18 +62,22 @@ export class CommentsController {
   async addLike(
     @Param('commentId', ParseIntPipe) commentId: number,
     @Body() { likeStatus }: LikeCreateModel,
-    @CurrentUser() userId: number | null,
+    @CurrentUserId() userId: number | null,
   ): Promise<void> {
     if (!userId) throw new HttpException('jwt valid, but user not found', 404);
-    const result = await this.commandBus.execute(new AddLikeToCommentCommand(commentId, userId, likeStatus));
-    if (result.isFailure()) ErrorResulter.proccesError(result);
+    return this.transactionHelper.doTransactional(async (): Promise<void> => {
+      const result = await this.commandBus.execute(new AddLikeToCommentCommand(commentId, userId, likeStatus));
+      if (result.isFailure()) ErrorResulter.proccesError(result);
+    });
   }
 
   @Delete(':commentId')
   @UseGuards(JwtAuthGuard, CommentOwnerGuard)
   @HttpCode(204)
   async deleteComment(@Param('commentId', ParseIntPipe) commentId: number): Promise<void> {
-    const result = await this.commandBus.execute(new DeleteCommentByIdCommand(commentId));
-    if (result.isFailure()) ErrorResulter.proccesError(result);
+    return this.transactionHelper.doTransactional(async (): Promise<void> => {
+      const result = await this.commandBus.execute(new DeleteCommentByIdCommand(commentId));
+      if (result.isFailure()) ErrorResulter.proccesError(result);
+    });
   }
 }

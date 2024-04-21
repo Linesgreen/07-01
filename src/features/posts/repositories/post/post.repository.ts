@@ -2,26 +2,28 @@
 // noinspection UnnecessaryLocalVariableJS
 
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 
+import { TransactionHelper } from '../../../../infrastructure/TransactionHelper/transaction-helper';
 import { Post_Orm } from '../../entites/post.orm.entities';
 
 @Injectable()
 export class PostRepository {
-  constructor(@InjectRepository(Post_Orm) protected postRepository: Repository<Post_Orm>) {}
+  constructor(private readonly transactionHelper: TransactionHelper) {}
 
   async findById(id: number): Promise<Post_Orm | null> {
-    const post = await this.postRepository.findOneBy({ id, isActive: true });
+    const postRepository = this.transactionHelper.getManager().getRepository(Post_Orm);
+    const post = await postRepository.findOneBy({ id, isActive: true });
     return post;
   }
 
   async deleteById(id: number): Promise<void> {
-    await this.postRepository.update({ id }, { isActive: false });
+    const postRepository = this.transactionHelper.getManager().getRepository(Post_Orm);
+    await postRepository.update({ id }, { isActive: false });
   }
 
   async save(post: Post_Orm): Promise<{ id: number }> {
-    await this.postRepository.save(post);
+    const postRepository = this.transactionHelper.getManager().getRepository(Post_Orm);
+    await postRepository.save(post);
     return { id: post.id };
   }
 }

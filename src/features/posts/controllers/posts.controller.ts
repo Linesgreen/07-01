@@ -16,9 +16,10 @@ import { CommandBus } from '@nestjs/cqrs';
 import { QueryPaginationPipe } from '../../../infrastructure/decorators/transform/query-pagination.pipe';
 import { JwtAuthGuard } from '../../../infrastructure/guards/jwt-auth.guard';
 import { ErrorResulter } from '../../../infrastructure/object-result/objcet-result';
+import { TransactionHelper } from '../../../infrastructure/TransactionHelper/transaction-helper';
 import { QueryPaginationResult } from '../../../infrastructure/types/query-sort.type';
 import { PaginationWithItems } from '../../../infrastructure/utils/createPagination';
-import { CurrentUser } from '../../auth/decorators/current-user.decorator';
+import { CurrentUserId } from '../../auth/decorators/current-user.decorator';
 import { CommentQueryRepository } from '../../comments/repositories/comments/comment.query.repository';
 import { CreateCommentCommand } from '../../comments/service/useCase/create-comment.useCase';
 import { LikeCreateModel } from '../../comments/types/comments/input';
@@ -34,11 +35,12 @@ export class PostsController {
     private commandBus: CommandBus,
     protected postQueryRepository: PostQueryRepository,
     protected commentQueryRepository: CommentQueryRepository,
+    private readonly transactionHelper: TransactionHelper,
   ) {}
 
   @Get('/')
   async getAllPosts(
-    @CurrentUser() userId: number | null,
+    @CurrentUserId() userId: number | null,
     @Query(QueryPaginationPipe) queryData: QueryPaginationResult,
   ): Promise<PaginationWithItems<OutputPostType>> {
     const post = await this.postQueryRepository.getPosts(queryData, userId);
@@ -49,7 +51,7 @@ export class PostsController {
 
   @Get(':postId')
   async getPost(
-    @CurrentUser() userId: number | null,
+    @CurrentUserId() userId: number | null,
     @Param('postId', ParseIntPipe) postId: number,
   ): Promise<OutputPostType> {
     const post = await this.postQueryRepository.findById(postId, userId);
@@ -60,7 +62,7 @@ export class PostsController {
 
   @Get(':postId/comments')
   async getCommentsForPost(
-    @CurrentUser() userId: number | null,
+    @CurrentUserId() userId: number | null,
     @Param('postId', ParseIntPipe) postId: number,
     @Query(QueryPaginationPipe) queryData: QueryPaginationResult,
   ): Promise<PaginationWithItems<OutputCommentType>> {
@@ -78,27 +80,31 @@ export class PostsController {
   async addLike(
     @Param('postId', ParseIntPipe) postId: number,
     @Body() { likeStatus }: LikeCreateModel,
-    @CurrentUser(ParseIntPipe) userId: number,
+    @CurrentUserId(ParseIntPipe) userId: number,
   ): Promise<void> {
-    const result = await this.commandBus.execute(new AddLikeToPostCommand(postId, userId, likeStatus));
-    if (result.isFailure()) ErrorResulter.proccesError(result);
+    return this.transactionHelper.doTransactional(async (): Promise<void> => {
+      const result = await this.commandBus.execute(new AddLikeToPostCommand(postId, userId, likeStatus));
+      if (result.isFailure()) ErrorResulter.proccesError(result);
+    });
   }
 
   @Post(':postId/comments')
   @HttpCode(201)
   @UseGuards(JwtAuthGuard)
   async createCommentToPost(
-    @CurrentUser() userId: number,
+    @CurrentUserId() userId: number,
     @Param('postId', ParseIntPipe) postId: number,
     @Body() { content }: CommentCreateModel,
   ): Promise<OutputCommentType> {
-    const result = await this.commandBus.execute(new CreateCommentCommand(userId, postId, content));
-    if (result.isFailure()) ErrorResulter.proccesError(result);
+    return this.transactionHelper.doTransactional(async (): Promise<OutputCommentType> => {
+      const result = await this.commandBus.execute(new CreateCommentCommand(userId, postId, content));
+      if (result.isFailure()) ErrorResulter.proccesError(result);
 
-    const { id: commentId } = result.value as { id: number };
-    const comment = await this.commentQueryRepository.findById(commentId, userId);
+      const { id: commentId } = result.value as { id: number };
+      const comment = await this.commentQueryRepository.findById(commentId, userId);
 
-    if (!comment) throw new NotFoundException(`Comment with id: ${commentId} not found`);
-    return comment;
+      if (!comment) throw new NotFoundException(`Comment with id: ${commentId} not found`);
+      return comment;
+    });
   }
 }

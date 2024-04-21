@@ -126,7 +126,6 @@ export class PostQueryRepository {
     const postIds = postsWithBlogName.map((p) => p.id);
 
     const lastThreeLikes = await this._getLastThreeLikes(postIds);
-
     const likeStatuses = await this.postLikeRepository.findBy({ postId: In(postIds), userId: userId ?? 0 });
     const likesCount = await this._getLikeCount(postIds);
 

@@ -1,17 +1,18 @@
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 
+import { TransactionHelper } from '../../../../infrastructure/TransactionHelper/transaction-helper';
 import { Comment_like_Orm } from '../../entites/comment-like.entities';
 
 @Injectable()
 export class CommentLikeRepository {
-  constructor(@InjectRepository(Comment_like_Orm) protected commentLikeRepository: Repository<Comment_like_Orm>) {}
+  constructor(private readonly transactionHelper: TransactionHelper) {}
   async findLikeByUserId(commentId: number, userId: number): Promise<Comment_like_Orm | null> {
-    return this.commentLikeRepository.findOneBy({ commentId, userId });
+    const commentLikeRepository = this.transactionHelper.getManager().getRepository(Comment_like_Orm);
+    return commentLikeRepository.findOneBy({ commentId, userId });
   }
 
   async save(like: Comment_like_Orm): Promise<void> {
-    await this.commentLikeRepository.save(like);
+    const commentLikeRepository = this.transactionHelper.getManager().getRepository(Comment_like_Orm);
+    await commentLikeRepository.save(like);
   }
 }

@@ -3,7 +3,7 @@ import { Controller, Get, NotFoundException, Param, ParseIntPipe, Query } from '
 import { QueryPaginationPipe } from '../../../infrastructure/decorators/transform/query-pagination.pipe';
 import { QueryPaginationResult } from '../../../infrastructure/types/query-sort.type';
 import { PaginationWithItems } from '../../../infrastructure/utils/createPagination';
-import { CurrentUser } from '../../auth/decorators/current-user.decorator';
+import { CurrentUserId } from '../../auth/decorators/current-user.decorator';
 import { PostQueryRepository } from '../../posts/repositories/post/post.query.repository';
 import { OutputPostType } from '../../posts/types/output';
 import { BlogsQueryRepository } from '../repositories/blog.query.repository';
@@ -32,7 +32,7 @@ export class BlogsController {
 
   @Get(':blogId/posts')
   async getPostForBlog(
-    @CurrentUser() userId: number,
+    @CurrentUserId() userId: number,
     @Query(QueryPaginationPipe) queryData: QueryPaginationResult,
     @Param('blogId', ParseIntPipe) blogId: number,
   ): Promise<PaginationWithItems<OutputPostType>> {

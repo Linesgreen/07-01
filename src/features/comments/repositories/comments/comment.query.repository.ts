@@ -2,9 +2,8 @@
 // noinspection ES6ShorthandObjectProperty,JSUnresolvedReference,DuplicatedCode
 
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 
+import { TransactionHelper } from '../../../../infrastructure/TransactionHelper/transaction-helper';
 import { QueryPaginationResult } from '../../../../infrastructure/types/query-sort.type';
 import { PaginationWithItems } from '../../../../infrastructure/utils/createPagination';
 import { Comment_Orm } from '../../entites/comment.orm.entities';
@@ -15,13 +14,11 @@ import { RawCommentType } from '../../types/comments/repo.types';
 
 @Injectable()
 export class CommentQueryRepository {
-  constructor(
-    @InjectRepository(Comment_Orm) protected commentRepository: Repository<Comment_Orm>,
-    @InjectRepository(Comment_like_Orm) protected commentLikeRepository: Repository<Comment_like_Orm>,
-  ) {}
+  constructor(private readonly transactionHelper: TransactionHelper) {}
 
   async findById(id: number, userId: number | null): Promise<OutputCommentType | null> {
-    const comment: RawCommentType | undefined = await this.commentRepository
+    const commentRepository = this.transactionHelper.getManager().getRepository(Comment_Orm);
+    const comment: RawCommentType | undefined = await commentRepository
       .createQueryBuilder('comment')
       .leftJoin('comment.user', 'user')
       .leftJoin('comment.likes', 'likes', 'likes.userId = :userId', { userId: userId })
@@ -48,6 +45,7 @@ export class CommentQueryRepository {
       .getRawOne();
 
     if (!comment) return null;
+
     return this._mapToOutputCommentType(comment);
   }
 
@@ -56,9 +54,11 @@ export class CommentQueryRepository {
     postId: number,
     userId: number | null,
   ): Promise<PaginationWithItems<OutputCommentType> | null> {
+    const commentRepository = this.transactionHelper.getManager().getRepository(Comment_Orm);
+
     const skip = (sortData.pageNumber - 1) * sortData.pageSize;
     console.log(sortData.pageSize);
-    const comments: RawCommentType[] = await this.commentRepository
+    const comments: RawCommentType[] = await commentRepository
       .createQueryBuilder('comment')
       .leftJoin('comment.user', 'user')
       .leftJoin('comment.likes', 'likes', 'likes.userId = :userId', { userId: userId })
@@ -88,7 +88,7 @@ export class CommentQueryRepository {
       .getRawMany();
     console.log(comments);
     if (!comments.length) return null;
-    const totalCount = await this.commentRepository.createQueryBuilder().where({ isActive: true, postId }).getCount();
+    const totalCount = await commentRepository.createQueryBuilder().where({ isActive: true, postId }).getCount();
 
     const commentsDto = comments.map((c) => this._mapToOutputCommentType(c));
     return new PaginationWithItems(sortData.pageNumber, sortData.pageSize, totalCount, commentsDto);

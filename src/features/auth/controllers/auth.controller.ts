@@ -8,7 +8,7 @@ import { CookieJwtGuard } from '../../../infrastructure/guards/jwt-cookie.guard'
 import { LocalAuthGuard } from '../../../infrastructure/guards/local-auth.guard';
 import { ErrorResulter } from '../../../infrastructure/object-result/objcet-result';
 import { SessionService } from '../../security/service/session.service';
-import { CurrentUser } from '../decorators/current-user.decorator';
+import { CurrentUserId } from '../decorators/current-user.decorator';
 import { UserAgent } from '../decorators/user-agent-from-headers.decorator';
 import { CurrentSession } from '../decorators/userId-sessionKey.decorator';
 import { ChangePasswordCommand } from '../service/useCases/change-password.useCase';
@@ -44,7 +44,7 @@ export class AuthController {
   async loginUser(
     @UserAgent() userAgent: string,
     @Ip() ip: string,
-    @CurrentUser(ParseIntPipe) userId: number,
+    @CurrentUserId(ParseIntPipe) userId: number,
     @Res({ passthrough: true }) res: Response,
   ): Promise<{ accessToken: string }> {
     const result = await this.commandBus.execute(new UserLoginCommand(userId, ip, userAgent));
@@ -98,7 +98,7 @@ export class AuthController {
   // Метод для получения информации о текущем пользователе
   @Get('me')
   @UseGuards(JwtAuthGuard)
-  async getUserInformation(@CurrentUser() userId: number): Promise<AboutMeType> {
+  async getUserInformation(@CurrentUserId() userId: number): Promise<AboutMeType> {
     const result = await this.commandBus.execute(new UserGetInformationAboutMeCommand(userId));
     if (result.isFailure()) ErrorResulter.proccesError(result);
     return result.value;
