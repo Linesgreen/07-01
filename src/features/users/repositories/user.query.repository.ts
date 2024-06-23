@@ -4,12 +4,12 @@ import { ILike, Repository } from 'typeorm';
 
 import { QueryPaginationResult } from '../../../infrastructure/types/query-sort.type';
 import { PaginationWithItems } from '../../../infrastructure/utils/createPagination';
-import { User_Orm } from '../entites/user.orm.entities';
+import { User } from '../entites/user.orm.entities';
 import { UserOutputType } from '../types/output';
 
 @Injectable()
 export class UserQueryRepository {
-  constructor(@InjectRepository(User_Orm) protected userRepository: Repository<User_Orm>) {}
+  constructor(@InjectRepository(User) protected userRepository: Repository<User>) {}
 
   async getUserById(userId: number): Promise<UserOutputType | null> {
     const user = await this.userRepository.findOneBy({ id: userId });
@@ -51,7 +51,7 @@ export class UserQueryRepository {
     return usersOutput;
   }
 
-  private userMapping(user: User_Orm): UserOutputType {
+  private userMapping(user: User): UserOutputType {
     return {
       id: user.id.toString(),
       login: user.login,

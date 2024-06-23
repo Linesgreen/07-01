@@ -3,7 +3,7 @@ import { BaseEntity, Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGe
 import { Blog_Orm } from '../../blogs/entites/blog.orm.entities';
 import { Post_Orm } from '../../posts/entites/post.orm.entities';
 import { CommentCreateData } from '../../posts/types/input';
-import { User_Orm } from '../../users/entites/user.orm.entities';
+import { User } from '../../users/entites/user.orm.entities';
 import { CommentUpdateModel } from '../types/comments/input';
 import { Comment_like_Orm } from './comment-like.entities';
 
@@ -31,9 +31,9 @@ export class Comment_Orm extends BaseEntity {
   @JoinColumn({ name: 'postId' })
   post: Blog_Orm;
 
-  @ManyToOne(() => User_Orm, (u) => u.comments)
+  @ManyToOne(() => User, (u) => u.comments)
   @JoinColumn({ name: 'userId' })
-  user: User_Orm;
+  user: User;
 
   @OneToMany(() => Comment_like_Orm, (l) => l.comment)
   likes: Comment_like_Orm[];

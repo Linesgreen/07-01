@@ -4,11 +4,12 @@ import { BaseEntity, Column, Entity, OneToMany, PrimaryGeneratedColumn } from 't
 import { Comment_Orm } from '../../comments/entites/comment.orm.entities';
 import { Comment_like_Orm } from '../../comments/entites/comment-like.entities';
 import { Post_like_Orm } from '../../posts/entites/post-like.orm.entities';
+import { Player } from '../../quiz/entites/player.entity';
 import { Session_Orm } from '../../security/entites/session.orm.entities';
 import { UserCreateData } from '../types/input';
 //Разобраться с флоу юзера
 @Entity()
-export class User_Orm extends BaseEntity {
+export class User extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -48,8 +49,11 @@ export class User_Orm extends BaseEntity {
   @OneToMany(() => Post_like_Orm, (pl) => pl.userId)
   postLikes: Post_like_Orm[];
 
-  static createUserModel(userData: UserCreateData, passwordHash: string): User_Orm {
-    const user = new User_Orm();
+  @OneToMany(() => Player, (player) => player.user)
+  player: Player[];
+
+  static createUserModel(userData: UserCreateData, passwordHash: string): User {
+    const user = new User();
     user.login = userData.login;
     user.email = userData.email;
 

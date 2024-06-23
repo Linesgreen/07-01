@@ -24,12 +24,13 @@ import { postProviders, postsUseCases } from './features/posts';
 import { PostsController } from './features/posts/controllers/posts.controller';
 import { Post_Orm } from './features/posts/entites/post.orm.entities';
 import { Post_like_Orm } from './features/posts/entites/post-like.orm.entities';
+import { QuizModule } from './features/quiz/quiz.module';
 import { SecurityController } from './features/security/controllers/security.controller';
 import { Session_Orm } from './features/security/entites/session.orm.entities';
 import { TestingController } from './features/testing/controllers/testing.controller';
 import { userProviders } from './features/users';
 import { SaUserController } from './features/users/controllers/sa.user.controller';
-import { User_Orm } from './features/users/entites/user.orm.entities';
+import { User } from './features/users/entites/user.orm.entities';
 import { UserRepository } from './features/users/repositories/user.repository';
 import { DeleteUserUseCase } from './features/users/services/useCase/delete-user.useCase';
 import { QueryPaginationPipe } from './infrastructure/decorators/transform/query-pagination.pipe';
@@ -58,6 +59,7 @@ const decorators = [
 //TODo на фор рут асин и вынести ттл в enw
 @Module({
   imports: [
+    QuizModule,
     ThrottlerModule.forRoot([
       {
         ttl: 10000,
@@ -67,7 +69,7 @@ const decorators = [
     ConfigModule.forRoot({ isGlobal: true }),
     //Регистрируем для работы в postgres
     TypeOrmModule.forRoot(configService.getTypeOrmConfig()),
-    TypeOrmModule.forFeature([User_Orm, Session_Orm, Blog_Orm, Post_Orm, Comment_Orm, Comment_like_Orm, Post_like_Orm]),
+    TypeOrmModule.forFeature([User, Session_Orm, Blog_Orm, Post_Orm, Comment_Orm, Comment_like_Orm, Post_like_Orm]),
     //Регистрируем для испльзования Passport strategy
     PassportModule,
     //Регистрируем для испльзования @CommandHandler

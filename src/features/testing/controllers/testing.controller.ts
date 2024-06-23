@@ -8,12 +8,12 @@ import { Comment_like_Orm } from '../../comments/entites/comment-like.entities';
 import { Post_Orm } from '../../posts/entites/post.orm.entities';
 import { Post_like_Orm } from '../../posts/entites/post-like.orm.entities';
 import { Session_Orm } from '../../security/entites/session.orm.entities';
-import { User_Orm } from '../../users/entites/user.orm.entities';
+import { User } from '../../users/entites/user.orm.entities';
 
 @Controller('testing')
 export class TestingController {
   constructor(
-    @InjectRepository(User_Orm) protected userRepository: Repository<User_Orm>,
+    @InjectRepository(User) protected userRepository: Repository<User>,
     @InjectRepository(Session_Orm) protected sessionRepository: Repository<Session_Orm>,
     @InjectRepository(Post_Orm) protected postRepository: Repository<Post_Orm>,
     @InjectRepository(Blog_Orm) protected blogRepository: Repository<Blog_Orm>,

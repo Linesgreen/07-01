@@ -5,7 +5,7 @@ import { DataSource, EntityManager } from 'typeorm';
 
 import { TransactionalCommandHandler } from '../../../../infrastructure/abstract-classes/transaction-commandHandler.abstract';
 import { Result } from '../../../../infrastructure/object-result/objcet-result';
-import { User_Orm } from '../../../users/entites/user.orm.entities';
+import { User } from '../../../users/entites/user.orm.entities';
 import { UserRepository } from '../../../users/repositories/user.repository';
 
 export class ChangePasswordCommand {
@@ -40,7 +40,7 @@ export class ChangePasswordUseCase extends TransactionalCommandHandler<ChangePas
   }
   //TODO добавил якобы транзакцию
   private async updatePasswordHashInDB(email: string, newHash: string, entityManager: EntityManager): Promise<void> {
-    const user: User_Orm | null = await this.userRepository.getByLoginOrEmail(email);
+    const user: User | null = await this.userRepository.getByLoginOrEmail(email);
     if (!user) {
       throw new Error('user not found');
     }

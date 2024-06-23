@@ -1,7 +1,7 @@
 import { BaseEntity, Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 import { LikeStatus } from '../../comments/types/comments/input';
-import { User_Orm } from '../../users/entites/user.orm.entities';
+import { User } from '../../users/entites/user.orm.entities';
 import { Post_Orm } from './post.orm.entities';
 
 @Entity()
@@ -19,9 +19,9 @@ export class Post_like_Orm extends BaseEntity {
   @Column()
   postId: number;
 
-  @ManyToOne(() => User_Orm, (u) => u.postLikes)
+  @ManyToOne(() => User, (u) => u.postLikes)
   @JoinColumn({ name: 'userId' })
-  user: User_Orm;
+  user: User;
 
   @Column()
   userId: number;

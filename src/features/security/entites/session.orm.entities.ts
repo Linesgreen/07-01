@@ -2,7 +2,7 @@ import { add } from 'date-fns';
 import { BaseEntity, Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 import { configService } from '../../../settings/config.service';
-import { User_Orm } from '../../users/entites/user.orm.entities';
+import { User } from '../../users/entites/user.orm.entities';
 import { SessionCreateData } from '../types/comon.types';
 
 @Entity()
@@ -25,17 +25,17 @@ export class Session_Orm extends BaseEntity {
   @Column()
   ip: string;
 
-  // @ManyToOne(() => User_Orm)
+  // @ManyToOne(() => User)
   @Column()
-  //@ManyToOne(() => User_Orm, (user) => user.sessions)
+  //@ManyToOne(() => User, (user) => user.sessions)
   userId: number;
 
   @Column({ default: true })
   isActive: boolean;
 
-  @ManyToOne(() => User_Orm, (u) => u.sessions)
+  @ManyToOne(() => User, (u) => u.sessions)
   @JoinColumn({ name: 'userId' })
-  user: User_Orm;
+  user: User;
 
   static createSessionModel(sessionCreateData: SessionCreateData): Session_Orm {
     const refTokenExpTime = configService.getRefreshTokenExp();
