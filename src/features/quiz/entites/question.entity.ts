@@ -1,3 +1,4 @@
+import { randomUUID } from 'crypto';
 import { Column, CreateDateColumn, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 import { Answer } from './answer.entity';
@@ -32,4 +33,16 @@ export class Question {
   @ManyToMany(() => Game, (game) => game.questions)
   @JoinTable()
   games: Game[];
+
+  //TODO убрать нафиг
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+  static checkSortingField(value: any) {
+    const q = new Question();
+    q.id = randomUUID();
+    q.body = '';
+    q.published = false;
+    q.createdAt = new Date();
+    q.updatedAt = new Date();
+    return q.hasOwnProperty(value);
+  }
 }
