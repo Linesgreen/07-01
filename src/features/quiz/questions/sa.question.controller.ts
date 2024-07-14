@@ -6,6 +6,7 @@ import {
   HttpCode,
   NotFoundException,
   Param,
+  Post,
   Put,
   Query,
   UseGuards,
@@ -40,15 +41,17 @@ export class SaQuestionController {
 
   //TODO object result
   @UseGuards(AuthGuard)
+  @Post()
   async createQuestion(@Body() dto: QuestionInputDto): Promise<QuestionViewDto> {
     const questionId = await this.commandBus.execute(new QuestionCreateCommand(dto));
     return this.questionsQueryRepository.findQuestion(questionId);
   }
+
   //TODO object result
   @UseGuards(AuthGuard)
   @Put(':id')
   @HttpCode(204)
-  async updateQuestion(@Body() questionInputDto: QuestionInputDto, @Param('id') questionId): Promise<Question> {
+  async updateQuestion(@Body() questionInputDto: QuestionInputDto, @Param('id') questionId: string): Promise<Question> {
     const result = await this.commandBus.execute(new QuestionUpdateCommand(questionInputDto, questionId));
 
     if (!result) throw new NotFoundException();
@@ -62,7 +65,7 @@ export class SaQuestionController {
   //TODO object result
   async publishQuestion(
     @Body() questionPublishInputDto: QuestionPublishInputDto,
-    @Param('id') questionId,
+    @Param('id') questionId: string,
   ): Promise<Question> {
     const result = await this.commandBus.execute(new QuestionPublishCommand(questionPublishInputDto, questionId));
 
@@ -77,7 +80,7 @@ export class SaQuestionController {
   @Delete(':id')
   @HttpCode(204)
   //TODO object result
-  async deleteQuestion(@Param('id') questionId): Promise<void> {
+  async deleteQuestion(@Param('id') questionId: string): Promise<void> {
     const result = await this.commandBus.execute(new QuestionDeleteCommand(questionId));
 
     if (!result) {

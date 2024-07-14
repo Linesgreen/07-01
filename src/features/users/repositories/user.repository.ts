@@ -21,7 +21,7 @@ export class UserRepository {
 
     const user = await userRepository.findOne({ where: { id, isActive: true } });
     if (!user) return null;
-    console.log(user);
+
     return user;
   }
 

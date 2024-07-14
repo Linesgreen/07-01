@@ -8,7 +8,7 @@ export enum ErrorStatus {
   //BAD_REQUEST_400 = 400,
   NOT_FOUND = 'NOT_FOUND',
   //UNAUTHORIZED_401 = 401,
-  // FORBIDDEN_403 = 403,
+  FORBIDDEN_403 = 403,
   SERVER_ERROR = 'SERVER_ERROR',
 }
 

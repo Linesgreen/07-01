@@ -16,6 +16,15 @@ export class QuestionsRepository {
     return result.id;
   }
 
+  async findRandomQuestions({ number }: { number: number }): Promise<Question[] | null> {
+    return this.questionsRepository
+      .createQueryBuilder('q')
+      .where('q.published = true')
+      .orderBy('RANDOM()')
+      .take(number)
+      .getMany();
+  }
+
   // ***** Find question operations *****
   async findQuestion(questionId: string): Promise<Question | null> {
     try {

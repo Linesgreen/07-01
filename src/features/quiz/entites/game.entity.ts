@@ -1,3 +1,4 @@
+import { randomUUID } from 'crypto';
 import { Column, CreateDateColumn, Entity, JoinColumn, ManyToMany, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 import { GameStatus } from '../enum/game-status.enum';
@@ -50,4 +51,15 @@ export class Game {
 
   @ManyToMany(() => Question, (question) => question.games)
   questions: Question[];
+
+  //TODO переделать
+  static checkSortingField(value: any) {
+    const g = new Game();
+    g.id = randomUUID();
+    g.status = GameStatus.Finished;
+    g.pairCreatedDate = new Date();
+    g.startGameDate = new Date();
+    g.finishGameDate = new Date();
+    return g.hasOwnProperty(value);
+  }
 }
