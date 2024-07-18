@@ -1,7 +1,7 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 
 import { ErrorStatus, Result } from '../../../../infrastructure/object-result/objcet-result';
-import { UserRepository } from '../../../users/repositories/user.repository';
+import { UserRepositoryNewTrans } from '../../../users/repositories/user.repository_with_new_trans';
 import { Game } from '../../entites/game.entity';
 import { Player } from '../../entites/player.entity';
 import { GameStatus } from '../../enum/game-status.enum';
@@ -16,7 +16,7 @@ export class UserConnectionCommand {
 @CommandHandler(UserConnectionCommand)
 export class UserConnectionHandler implements ICommandHandler<UserConnectionCommand> {
   constructor(
-    protected userRepository: UserRepository,
+    protected userRepository: UserRepositoryNewTrans,
     protected gamesRepository: GamesRepository,
     protected questionsRepository: QuestionsRepository,
     protected playerRepository: PlayerRepository,
@@ -43,7 +43,7 @@ export class UserConnectionHandler implements ICommandHandler<UserConnectionComm
         (game.status === GameStatus.PendingSecondPlayer && game.playerOne.user.id === userId) ||
         game.status === GameStatus.Active
       ) {
-        return Result.Err(ErrorStatus.FORBIDDEN_403, 'User already in game');
+        return Result.Err(ErrorStatus.FORBIDDEN, 'User already in game');
       }
       game.playerTwo = player;
       game.status = GameStatus.Active;

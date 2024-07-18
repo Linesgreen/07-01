@@ -1,13 +1,27 @@
-import { Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  ForbiddenException,
+  Get,
+  HttpCode,
+  NotFoundException,
+  Param,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 
 import { JwtAuthGuard } from '../../../infrastructure/guards/jwt-auth.guard';
 import { ErrorResulter } from '../../../infrastructure/object-result/objcet-result';
+import { TransactionHelper } from '../../../infrastructure/TransactionHelper/transaction-helper';
 import { Paginator } from '../../../infrastructure/utils/createPagination';
 import { CurrentUserId } from '../../auth/decorators/current-user.decorator';
 import { GamesQueryRepository } from '../repositories/games.query.repository';
+import { AnswerSendCommand } from './command/answer-send.command';
 import { UserConnectionCommand } from './command/user-connection.command';
-import { GameViewDto } from './dto/games.view.output.dto';
+import { AnswerInputDto } from './dto/answers.input.dto';
+import { AnswerViewDto, GameViewDto } from './dto/games.view.output.dto';
 import { GameQueryDto } from './dto/games-query.input.dto';
 import { PlayerTopQueryDto } from './dto/player-top-query.input.dto';
 import { StatsViewDto } from './dto/status-view.output.dto';
@@ -18,15 +32,18 @@ export class PublicQuizController {
   constructor(
     private readonly commandBus: CommandBus,
     private readonly gamesQueryRepository: GamesQueryRepository,
+    private readonly transactionHelper: TransactionHelper,
   ) {}
 
   @UseGuards(JwtAuthGuard)
   @Post('pairs/connection')
   async connectUser(@CurrentUserId() userId: number): Promise<GameViewDto> {
-    const result = await this.commandBus.execute(new UserConnectionCommand({ userId }));
-    if (result.isFailure()) ErrorResulter.proccesError(result);
+    return this.transactionHelper.doTransactional(async () => {
+      const result = await this.commandBus.execute(new UserConnectionCommand({ userId }));
+      if (result.isFailure()) ErrorResulter.proccesError(result);
 
-    return this.gamesQueryRepository.findGameById(result.value.gameId);
+      return this.gamesQueryRepository.findGameById(result.value.gameId);
+    });
   }
 
   @UseGuards(JwtAuthGuard)
@@ -44,5 +61,49 @@ export class PublicQuizController {
   @Get('pairs/my')
   async findMyGames(@Query() query: GameQueryDto, @CurrentUserId() userId: number): Promise<Paginator<GameViewDto[]>> {
     return this.gamesQueryRepository.findMyGames(query, userId);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('pairs/my-current')
+  async findCurrentGame(@CurrentUserId() userId: number): Promise<GameViewDto> {
+    const game = await this.gamesQueryRepository.findCurrentGame(userId);
+
+    if (!game) throw new NotFoundException();
+    return game;
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('pairs/:id')
+  async findGame(@Param('id') gameId: string, @CurrentUserId() userId: number): Promise<GameViewDto> {
+    const currentGame = await this.gamesQueryRepository.findGameById(gameId);
+
+    if (!currentGame) throw new NotFoundException();
+
+    const playerOneProgress = currentGame.firstPlayerProgress;
+    const playerTwoProgress = currentGame.secondPlayerProgress;
+
+    if (playerOneProgress && !playerTwoProgress) {
+      throw new ForbiddenException();
+    }
+
+    if (playerOneProgress.player.id !== userId.toString() && playerTwoProgress?.player.id !== userId.toString()) {
+      throw new ForbiddenException();
+    }
+
+    return currentGame;
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('pairs/my-current/answers')
+  @HttpCode(200)
+  async sendAnswer(@Body() answerInputDto: AnswerInputDto, @CurrentUserId() userId: number): Promise<AnswerViewDto> {
+    console.log('______________________________________________________________________________');
+    return this.transactionHelper.doTransactional(async (): Promise<AnswerViewDto> => {
+      const result = await this.commandBus.execute(new AnswerSendCommand({ answerInputDto, userId }));
+      if (result.isFailure()) ErrorResulter.proccesError(result);
+
+      const { gameId } = result.value;
+      return this.gamesQueryRepository.findAnswerInGame(gameId, userId);
+    });
   }
 }

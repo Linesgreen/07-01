@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any,no-underscore-dangle,@typescript-eslint/member-ordering */
-import { HttpException, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, HttpException, NotFoundException } from '@nestjs/common';
 
 export enum ErrorStatus {
   // OK_200 = 200,
@@ -8,7 +8,7 @@ export enum ErrorStatus {
   //BAD_REQUEST_400 = 400,
   NOT_FOUND = 'NOT_FOUND',
   //UNAUTHORIZED_401 = 401,
-  FORBIDDEN_403 = 403,
+  FORBIDDEN = 'FORBIDDEN',
   SERVER_ERROR = 'SERVER_ERROR',
 }
 
@@ -60,10 +60,10 @@ export class ErrorResulter {
     switch (error.err) {
       case ErrorStatus.NOT_FOUND:
         throw new NotFoundException(error.value);
-        break;
       case 'SERVER_ERROR':
         throw new HttpException(error.value as string, 500);
-        break;
+      case 'FORBIDDEN':
+        throw new ForbiddenException();
     }
   }
 }

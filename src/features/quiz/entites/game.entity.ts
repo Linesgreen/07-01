@@ -34,7 +34,7 @@ export class Game {
     type: 'timestamp with time zone',
     nullable: true,
   })
-  finishingExpirationDate: Date;
+  finishingExpirationDate: Date | null;
 
   @OneToOne(() => Player, (player) => player.game, {
     onDelete: 'CASCADE',

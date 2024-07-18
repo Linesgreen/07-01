@@ -1,6 +1,5 @@
 import { BaseEntity, Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
-import { Blog_Orm } from '../../blogs/entites/blog.orm.entities';
 import { Post_Orm } from '../../posts/entites/post.orm.entities';
 import { CommentCreateData } from '../../posts/types/input';
 import { User } from '../../users/entites/user.orm.entities';
@@ -29,7 +28,7 @@ export class Comment_Orm extends BaseEntity {
 
   @ManyToOne(() => Post_Orm, (p) => p.comments)
   @JoinColumn({ name: 'postId' })
-  post: Blog_Orm;
+  post: Post_Orm;
 
   @ManyToOne(() => User, (u) => u.comments)
   @JoinColumn({ name: 'userId' })

@@ -1,23 +1,18 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 
+import { TransactionHelper } from '../../../infrastructure/TransactionHelper/transaction-helper';
 import { Game } from '../entites/game.entity';
-import { Player } from '../entites/player.entity';
 import { GameStatus } from '../enum/game-status.enum';
 
 @Injectable()
 export class GamesRepository {
-  constructor(
-    @InjectRepository(Game)
-    private readonly gamesRepository: Repository<Game>,
-    @InjectRepository(Player)
-    private readonly playerRepository: Repository<Player>,
-  ) {}
+  constructor(private readonly transactionHelper: TransactionHelper) {}
 
   async findGameForConnection(data: { userId: number }): Promise<Game | null> {
-    return this.gamesRepository
+    const repository = this.transactionHelper.getManager().getRepository(Game);
+
+    return repository
       .createQueryBuilder('game')
       .leftJoinAndSelect('game.playerOne', 'po')
       .leftJoinAndSelect('game.playerTwo', 'pt')
@@ -33,7 +28,34 @@ export class GamesRepository {
       .getOne();
   }
 
+  async findGameForAnswer(userId: number): Promise<Game | null> {
+    const repository = this.transactionHelper.getManager().getRepository(Game);
+
+    return repository
+      .createQueryBuilder('game')
+      .setLock('pessimistic_write', undefined, ['game'])
+      .leftJoinAndSelect('game.questions', 'gq')
+      .leftJoinAndSelect('game.playerOne', 'po')
+      .leftJoinAndSelect('po.user', 'pou')
+      .leftJoinAndSelect('po.answers', 'poa')
+      .leftJoinAndSelect('poa.question', 'poaq')
+      .leftJoinAndSelect('game.playerTwo', 'pt')
+      .leftJoinAndSelect('pt.user', 'ptu')
+      .leftJoinAndSelect('pt.answers', 'pta')
+      .leftJoinAndSelect('pta.question', 'ptaq')
+      .where('game.status = :active', {
+        active: GameStatus.Active,
+      })
+      .andWhere('(pou.id = :userId or ptu.id = :userId)', { userId: userId })
+      .orderBy('gq.created_at', 'DESC')
+      .addOrderBy('poa.added_at')
+      .addOrderBy('pta.added_at')
+      .getOne();
+  }
+
   async save(game: Game): Promise<Game> {
-    return this.gamesRepository.save(game);
+    const repository = this.transactionHelper.getManager().getRepository(Game);
+
+    return repository.save(game);
   }
 }

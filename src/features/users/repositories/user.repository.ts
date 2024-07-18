@@ -52,6 +52,7 @@ export class UserRepository {
   async save(user: User, entityManager?: EntityManager): Promise<{ id: number }> {
     const userRepository = this._getUserRepository(entityManager);
     await userRepository.save(user);
+
     return { id: user.id };
   }
 

@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, SelectQueryBuilder } from 'typeorm';
 
+import { TransactionHelper } from '../../../infrastructure/TransactionHelper/transaction-helper';
 import { Paginator } from '../../../infrastructure/utils/createPagination';
 import { Answer } from '../entites/answer.entity';
 import { Game } from '../entites/game.entity';
@@ -17,15 +17,15 @@ import { TopViewDto } from '../pair-game-quiz/dto/top-view.output.dto';
 
 @Injectable()
 export class GamesQueryRepository {
-  constructor(
-    @InjectRepository(Game)
-    private readonly gamesRepository: Repository<Game>,
-    @InjectRepository(Player)
-    private readonly playersRepository: Repository<Player>,
-  ) {}
+  private readonly gamesRepository: Repository<Game>;
+  private readonly playersRepository: Repository<Player>;
+  constructor(private readonly transactionHelper: TransactionHelper) {
+    this.gamesRepository = this.transactionHelper.getManager().getRepository(Game);
+    this.playersRepository = this.transactionHelper.getManager().getRepository(Player);
+  }
 
   async findMyGames(query: GameQueryDto, userId: number): Promise<Paginator<GameViewDto[]>> {
-    const games: unknown[] = await this.gamesRepository
+    const games = await this.gamesRepository
       // Creating game object
       .createQueryBuilder('game')
 
@@ -203,7 +203,7 @@ export class GamesQueryRepository {
     });
   }
 
-  async findCurrentGame(userId: string): Promise<GameViewDto> {
+  async findCurrentGame(userId: number): Promise<GameViewDto> {
     const games = await this.gamesRepository
       .createQueryBuilder('game')
       .leftJoinAndSelect('game.questions', 'gq')
@@ -269,7 +269,7 @@ export class GamesQueryRepository {
     }
   }
 
-  async findAnswerInGame(gameId: string, userId: string): Promise<AnswerViewDto> {
+  async findAnswerInGame(gameId: string, userId: number): Promise<AnswerViewDto> {
     const games = await this.gamesRepository
       .createQueryBuilder('game')
       .leftJoinAndSelect('game.questions', 'gq')
@@ -659,7 +659,7 @@ export class GamesQueryRepository {
         secondPlayerProgress = {
           answers: playerTwoAnswers,
           player: {
-            id: g.p_two[0].pt_user_id.toString(),
+            id: g.p_two[0].pt_user_id,
             login: g.p_two[0].pt_user_login,
           },
           score: g.p_two[0].pt_score,

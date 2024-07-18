@@ -4,12 +4,12 @@ import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 
 import { SessionRepository } from '../../features/security/repository/session.repository';
-import { UserRepository } from '../../features/users/repositories/user.repository';
+import { UserRepositoryNewTrans } from '../../features/users/repositories/user.repository_with_new_trans';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(
-    private userRepository: UserRepository,
+    private userRepository: UserRepositoryNewTrans,
     private sessionRepository: SessionRepository,
   ) {
     super({
