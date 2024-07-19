@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   ForbiddenException,
@@ -11,6 +12,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
+import { validate as isUuid } from 'uuid';
 
 import { JwtAuthGuard } from '../../../infrastructure/guards/jwt-auth.guard';
 import { ErrorResulter } from '../../../infrastructure/object-result/objcet-result';
@@ -37,12 +39,17 @@ export class PublicQuizController {
 
   @UseGuards(JwtAuthGuard)
   @Post('pairs/connection')
+  @HttpCode(200)
   async connectUser(@CurrentUserId() userId: number): Promise<GameViewDto> {
     return this.transactionHelper.doTransactional(async () => {
       const result = await this.commandBus.execute(new UserConnectionCommand({ userId }));
       if (result.isFailure()) ErrorResulter.proccesError(result);
-
-      return this.gamesQueryRepository.findGameById(result.value.gameId);
+      console.log(result, 'result');
+      console.log(result.value, 'result.value');
+      console.log(result.value.gameId, 'result.value.gameId');
+      const currentGame = await this.gamesQueryRepository.findGameById(result.value.gameId);
+      console.log(currentGame, 'currentGame');
+      return currentGame;
     });
   }
 
@@ -75,6 +82,10 @@ export class PublicQuizController {
   @UseGuards(JwtAuthGuard)
   @Get('pairs/:id')
   async findGame(@Param('id') gameId: string, @CurrentUserId() userId: number): Promise<GameViewDto> {
+    if (!isUuid(gameId) && !isNaN(Number(gameId))) throw new NotFoundException();
+
+    if (!isUuid(gameId)) throw new BadRequestException();
+
     const currentGame = await this.gamesQueryRepository.findGameById(gameId);
 
     if (!currentGame) throw new NotFoundException();
@@ -83,10 +94,12 @@ export class PublicQuizController {
     const playerTwoProgress = currentGame.secondPlayerProgress;
 
     if (playerOneProgress && !playerTwoProgress) {
-      throw new ForbiddenException();
+      if (playerOneProgress.player.id !== userId.toString()) {
+        throw new ForbiddenException();
+      }
     }
 
-    if (playerOneProgress.player.id !== userId.toString() && playerTwoProgress?.player.id !== userId.toString()) {
+    if (playerOneProgress.player.id !== userId.toString() && playerTwoProgress!.player.id !== userId.toString()) {
       throw new ForbiddenException();
     }
 
@@ -97,7 +110,6 @@ export class PublicQuizController {
   @Post('pairs/my-current/answers')
   @HttpCode(200)
   async sendAnswer(@Body() answerInputDto: AnswerInputDto, @CurrentUserId() userId: number): Promise<AnswerViewDto> {
-    console.log('______________________________________________________________________________');
     return this.transactionHelper.doTransactional(async (): Promise<AnswerViewDto> => {
       const result = await this.commandBus.execute(new AnswerSendCommand({ answerInputDto, userId }));
       if (result.isFailure()) ErrorResulter.proccesError(result);

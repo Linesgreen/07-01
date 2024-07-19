@@ -25,6 +25,7 @@ export class TransactionHelper {
   }
 
   async doTransactional<T>(fn): Promise<T> {
+    // @ts-ignore
     return this.dataSource.transaction(async (manager) => {
       let response: T | undefined;
       await this.asyncLocalStorage.run(new Map<string, EntityManager>(), async () => {
@@ -34,7 +35,8 @@ export class TransactionHelper {
       if (response !== undefined) {
         return response;
       } else {
-        throw new Error('Response is not assigned.');
+        // throw new Error('Response is not assigned.');
+        return response;
       }
     });
   }

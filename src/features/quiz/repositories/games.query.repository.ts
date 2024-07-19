@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Injectable } from '@nestjs/common';
-import { Repository, SelectQueryBuilder } from 'typeorm';
+import { SelectQueryBuilder } from 'typeorm';
 
 import { TransactionHelper } from '../../../infrastructure/TransactionHelper/transaction-helper';
 import { Paginator } from '../../../infrastructure/utils/createPagination';
@@ -17,15 +17,12 @@ import { TopViewDto } from '../pair-game-quiz/dto/top-view.output.dto';
 
 @Injectable()
 export class GamesQueryRepository {
-  private readonly gamesRepository: Repository<Game>;
-  private readonly playersRepository: Repository<Player>;
-  constructor(private readonly transactionHelper: TransactionHelper) {
-    this.gamesRepository = this.transactionHelper.getManager().getRepository(Game);
-    this.playersRepository = this.transactionHelper.getManager().getRepository(Player);
-  }
+  constructor(private readonly transactionHelper: TransactionHelper) {}
 
   async findMyGames(query: GameQueryDto, userId: number): Promise<Paginator<GameViewDto[]>> {
-    const games = await this.gamesRepository
+    const gamesRepository = this.transactionHelper.getManager().getRepository(Game);
+
+    const games = await gamesRepository
       // Creating game object
       .createQueryBuilder('game')
 
@@ -181,7 +178,7 @@ export class GamesQueryRepository {
       // Getting result
       .getRawMany();
 
-    const totalCount = await this.gamesRepository
+    const totalCount = await gamesRepository
       .createQueryBuilder('game')
       .leftJoinAndSelect('game.questions', 'gq')
       .leftJoinAndSelect('game.playerOne', 'po')
@@ -204,7 +201,9 @@ export class GamesQueryRepository {
   }
 
   async findCurrentGame(userId: number): Promise<GameViewDto> {
-    const games = await this.gamesRepository
+    const gamesRepository = this.transactionHelper.getManager().getRepository(Game);
+
+    const games = await gamesRepository
       .createQueryBuilder('game')
       .leftJoinAndSelect('game.questions', 'gq')
       .leftJoinAndSelect('game.playerOne', 'po')
@@ -234,9 +233,15 @@ export class GamesQueryRepository {
     return mappedGames[0];
   }
 
-  async findGameById(gameId: string): Promise<GameViewDto> {
+  async findGameById(gameId: string): Promise<GameViewDto | null> {
+    console.log('++++++++++++++++++++++++++++++++++++++++++++++++');
+    console.log(gameId);
+    console.log('++++++++++++++++++++++++++++++++++++++++++++++++');
+
+    const gamesRepository = this.transactionHelper.getManager().getRepository(Game);
+
     try {
-      const games = await this.gamesRepository
+      const games = await gamesRepository
         .createQueryBuilder('game')
         .leftJoinAndSelect('game.questions', 'gq')
         .leftJoinAndSelect('game.playerOne', 'po')
@@ -254,9 +259,8 @@ export class GamesQueryRepository {
         .addOrderBy('poa.addedAt')
         .addOrderBy('pta.addedAt')
         .getMany();
-
+      console.log(games, 'games');
       if (games.length === 0) {
-        // @ts-ignore
         return null;
       }
 
@@ -264,13 +268,14 @@ export class GamesQueryRepository {
       return mappedGames[0];
     } catch (e) {
       console.log(e);
-      // @ts-ignore
       return null;
     }
   }
 
   async findAnswerInGame(gameId: string, userId: number): Promise<AnswerViewDto> {
-    const games = await this.gamesRepository
+    const gamesRepository = this.transactionHelper.getManager().getRepository(Game);
+
+    const games = await gamesRepository
       .createQueryBuilder('game')
       .leftJoinAndSelect('game.questions', 'gq')
       .leftJoinAndSelect('game.playerOne', 'po')
@@ -308,7 +313,9 @@ export class GamesQueryRepository {
   }
 
   async getTop(query: PlayerTopQueryDto): Promise<Paginator<TopViewDto[]>> {
-    const top = this.playersRepository
+    const playerRepository = this.transactionHelper.getManager().getRepository(Player);
+
+    const top = playerRepository
       .createQueryBuilder('pl')
       .select('pl.user', 'u_id')
       .addSelect('u.login', 'u_login')
@@ -382,7 +389,7 @@ export class GamesQueryRepository {
 
     const topResult = await this.addOrderByAndGet(top, query);
 
-    const totalCount = await this.playersRepository
+    const totalCount = await playerRepository
       .createQueryBuilder('pl')
       .select('count(distinct "userId")', 'pl_count')
       .getRawOne();
@@ -396,7 +403,9 @@ export class GamesQueryRepository {
   }
 
   async getStatistics(userId: number): Promise<StatsViewDto> {
-    const stats = await this.playersRepository
+    const playerRepository = this.transactionHelper.getManager().getRepository(Player);
+
+    const stats = await playerRepository
       .createQueryBuilder('p')
       .select('p.id', 'p_id')
       .addSelect('p.user', 'u_id')

@@ -9,10 +9,10 @@ export class Answer {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ type: 'varchar' })
+  @Column({ name: 'answer_status', type: 'varchar' })
   answerStatus: AnswerStatus;
 
-  @CreateDateColumn({ type: 'timestamp with time zone' })
+  @CreateDateColumn({ name: 'added_at', type: 'timestamp with time zone' })
   addedAt: Date;
 
   @ManyToOne(() => Player, (player) => player.answers, {

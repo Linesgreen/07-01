@@ -12,16 +12,17 @@ export class Question {
   @Column({ type: 'varchar' })
   body: string;
 
-  @Column({ type: 'jsonb', default: [] })
-  correctAnswers: string[];
+  @Column({ name: 'correct_answers', type: 'jsonb', default: [] })
+  correctAnswers;
 
   @Column({ type: 'boolean', default: false })
   published: boolean;
 
-  @CreateDateColumn({ type: 'timestamp with time zone' })
+  @CreateDateColumn({ name: 'created_at', type: 'timestamp with time zone' })
   createdAt: Date;
 
   @Column({
+    name: 'updated_at',
     type: 'timestamp with time zone',
     nullable: true,
   })

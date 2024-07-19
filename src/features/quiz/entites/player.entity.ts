@@ -9,7 +9,10 @@ export class Player {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ type: 'int' })
+  @Column({
+    name: 'score',
+    type: 'int',
+  })
   score: number;
 
   @OneToOne(() => Game)

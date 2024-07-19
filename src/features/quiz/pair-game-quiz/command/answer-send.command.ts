@@ -23,10 +23,7 @@ export class AnswerSendHandler implements ICommandHandler<AnswerSendCommand> {
   ) {}
 
   async execute(command: AnswerSendCommand) {
-    console.log('++++++++++++++++++++++++++++++++++++++++++++++++++++++++');
-
     const currentGame = await this.gamesRepository.findGameForAnswer(command.data.userId);
-    console.log('101010101010101010101010101010101010101010');
 
     if (!currentGame) return Result.Err(ErrorStatus.FORBIDDEN, 'Game not found');
 
@@ -34,7 +31,6 @@ export class AnswerSendHandler implements ICommandHandler<AnswerSendCommand> {
     if (currentGame.playerTwo && command.data.userId === currentGame.playerTwo.user.id) {
       currentPlayer = currentGame.playerTwo;
     }
-    console.log('111111111111111111111111111111111111');
 
     const questionIndex = currentPlayer.answers.length;
     if (questionIndex >= 5) {

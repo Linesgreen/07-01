@@ -14,23 +14,27 @@ export class Game {
   status: GameStatus;
 
   @CreateDateColumn({
+    name: 'pair_created_date',
     type: 'timestamp with time zone',
   })
   pairCreatedDate: Date;
 
   @Column({
+    name: 'start_game_date',
     type: 'timestamp with time zone',
     nullable: true,
   })
-  startGameDate: Date;
+  startGameDate: Date | null;
 
   @Column({
+    name: 'finish_game_date',
     type: 'timestamp with time zone',
     nullable: true,
   })
-  finishGameDate: Date;
+  finishGameDate: Date | null;
 
   @Column({
+    name: 'finishing_expiration_date',
     type: 'timestamp with time zone',
     nullable: true,
   })

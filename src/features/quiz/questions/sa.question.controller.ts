@@ -12,6 +12,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
+import { validate as isUuid } from 'uuid';
 
 import { AuthGuard } from '../../../infrastructure/guards/auth-basic.guard';
 import { Paginator } from '../../../infrastructure/utils/createPagination';
@@ -52,6 +53,7 @@ export class SaQuestionController {
   @Put(':id')
   @HttpCode(204)
   async updateQuestion(@Body() questionInputDto: QuestionInputDto, @Param('id') questionId: string): Promise<Question> {
+    if (!isUuid(questionId)) throw new NotFoundException();
     const result = await this.commandBus.execute(new QuestionUpdateCommand(questionInputDto, questionId));
 
     if (!result) throw new NotFoundException();
@@ -67,6 +69,8 @@ export class SaQuestionController {
     @Body() questionPublishInputDto: QuestionPublishInputDto,
     @Param('id') questionId: string,
   ): Promise<Question> {
+    if (!isUuid(questionId)) throw new NotFoundException();
+
     const result = await this.commandBus.execute(new QuestionPublishCommand(questionPublishInputDto, questionId));
 
     if (!result) {
@@ -81,6 +85,9 @@ export class SaQuestionController {
   @HttpCode(204)
   //TODO object result
   async deleteQuestion(@Param('id') questionId: string): Promise<void> {
+    if (!isUuid(questionId)) {
+      throw new NotFoundException();
+    }
     const result = await this.commandBus.execute(new QuestionDeleteCommand(questionId));
 
     if (!result) {
