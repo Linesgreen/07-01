@@ -53,6 +53,23 @@ export class GamesRepository {
       .getOne();
   }
 
+  async findGamesToFinish(): Promise<Game[] | null> {
+    const repository = this.transactionHelper.getManager().getRepository(Game);
+    return repository
+      .createQueryBuilder('game')
+      .leftJoinAndSelect('game.questions', 'gq')
+      .leftJoinAndSelect('game.playerOne', 'po')
+      .leftJoinAndSelect('po.user', 'pou')
+      .leftJoinAndSelect('po.answers', 'poa')
+      .leftJoinAndSelect('poa.question', 'poaq')
+      .leftJoinAndSelect('game.playerTwo', 'pt')
+      .leftJoinAndSelect('pt.user', 'ptu')
+      .leftJoinAndSelect('pt.answers', 'pta')
+      .leftJoinAndSelect('pta.question', 'ptaq')
+      .andWhere('game.finishingExpirationDate < now()')
+      .getMany();
+  }
+
   async save(game: Game): Promise<Game> {
     const repository = this.transactionHelper.getManager().getRepository(Game);
 

@@ -668,7 +668,7 @@ export class GamesQueryRepository {
         secondPlayerProgress = {
           answers: playerTwoAnswers,
           player: {
-            id: g.p_two[0].pt_user_id,
+            id: g.p_two[0].pt_user_id.toString(),
             login: g.p_two[0].pt_user_login,
           },
           score: g.p_two[0].pt_score,
@@ -734,7 +734,7 @@ export class GamesQueryRepository {
         lossesCount: +a.lossesCount,
         drawsCount: +a.drawsCount,
         player: {
-          id: a.u_id,
+          id: a.u_id.toString(),
           login: a.u_login,
         },
       };

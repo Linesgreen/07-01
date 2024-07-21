@@ -2,6 +2,7 @@
 
 import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
+import { ScheduleModule } from '@nestjs/schedule';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { TransactionHelper } from '../../infrastructure/TransactionHelper/transaction-helper';
@@ -13,6 +14,7 @@ import { Game } from './entites/game.entity';
 import { Player } from './entites/player.entity';
 import { Question } from './entites/question.entity';
 import { AnswerSendHandler } from './pair-game-quiz/command/answer-send.command';
+import { GameFinishHandler } from './pair-game-quiz/command/game-finish.command';
 import { UserConnectionHandler } from './pair-game-quiz/command/user-connection.command';
 import { PublicQuizController } from './pair-game-quiz/quiz.controller';
 import { QuestionCreateUseCase } from './questions/command/question-create.command';
@@ -34,10 +36,11 @@ const commands = [
   AnswerSendHandler,
   QuestionUpdateUseCase,
   QuestionDeleteUseCase,
+  GameFinishHandler,
 ];
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Answer, Game, Player, Question, User]), CqrsModule],
+  imports: [TypeOrmModule.forFeature([Answer, Game, Player, Question, User]), CqrsModule, ScheduleModule.forRoot()],
   controllers: [SaQuestionController, PublicQuizController],
   providers: [
     UserRepository,
