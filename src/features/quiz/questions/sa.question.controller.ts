@@ -40,7 +40,6 @@ export class SaQuestionController {
     return this.questionsQueryRepository.findQuestions(query);
   }
 
-  //TODO object result
   @UseGuards(AuthGuard)
   @Post()
   async createQuestion(@Body() dto: QuestionInputDto): Promise<QuestionViewDto> {
@@ -48,7 +47,6 @@ export class SaQuestionController {
     return this.questionsQueryRepository.findQuestion(questionId);
   }
 
-  //TODO object result
   @UseGuards(AuthGuard)
   @Put(':id')
   @HttpCode(204)
@@ -64,7 +62,6 @@ export class SaQuestionController {
   @UseGuards(AuthGuard)
   @Put(':id/publish')
   @HttpCode(204)
-  //TODO object result
   async publishQuestion(
     @Body() questionPublishInputDto: QuestionPublishInputDto,
     @Param('id') questionId: string,
@@ -83,7 +80,6 @@ export class SaQuestionController {
   @UseGuards(AuthGuard)
   @Delete(':id')
   @HttpCode(204)
-  //TODO object result
   async deleteQuestion(@Param('id') questionId: string): Promise<void> {
     if (!isUuid(questionId)) {
       throw new NotFoundException();

@@ -43,13 +43,10 @@ export class PublicQuizController {
   async connectUser(@CurrentUserId() userId: number): Promise<GameViewDto> {
     return this.transactionHelper.doTransactional(async () => {
       const result = await this.commandBus.execute(new UserConnectionCommand({ userId }));
+
       if (result.isFailure()) ErrorResulter.proccesError(result);
-      console.log(result, 'result');
-      console.log(result.value, 'result.value');
-      console.log(result.value.gameId, 'result.value.gameId');
-      const currentGame = await this.gamesQueryRepository.findGameById(result.value.gameId);
-      console.log(currentGame, 'currentGame');
-      return currentGame;
+
+      return this.gamesQueryRepository.findGameById(result.value.gameId);
     });
   }
 

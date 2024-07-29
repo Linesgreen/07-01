@@ -10,7 +10,7 @@ import { UserRepository } from '../../repositories/user.repository';
 export class DeleteUserCommand {
   constructor(public userId: number) {}
 }
-//TODO показать класс
+
 @CommandHandler(DeleteUserCommand)
 export class DeleteUserUseCase extends TransactionalCommandHandler<DeleteUserCommand> {
   constructor(

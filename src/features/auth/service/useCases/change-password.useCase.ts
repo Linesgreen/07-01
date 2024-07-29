@@ -38,7 +38,7 @@ export class ChangePasswordUseCase extends TransactionalCommandHandler<ChangePas
     const { email } = this.jwtService.decode(jwt);
     return email;
   }
-  //TODO добавил якобы транзакцию
+
   private async updatePasswordHashInDB(email: string, newHash: string, entityManager: EntityManager): Promise<void> {
     const user: User | null = await this.userRepository.getByLoginOrEmail(email);
     if (!user) {

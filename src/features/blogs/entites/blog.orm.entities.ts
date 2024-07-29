@@ -52,7 +52,7 @@ export class Blog_Orm extends BaseEntity {
       this.websiteUrl = updateData.websiteUrl;
     }
   }
-  //TODO в репу переместить
+
   async delete(): Promise<void> {
     this.isActive = false;
     await this.save();

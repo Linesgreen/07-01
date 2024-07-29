@@ -57,7 +57,6 @@ export class QuestionQueryDto extends QueryDto {
   bodySearchTerm: string;
 }
 
-//TODO разнести
 export enum PublishedStatus {
   All = 'all',
   Published = 'published',

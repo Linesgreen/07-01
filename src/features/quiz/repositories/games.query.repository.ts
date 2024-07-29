@@ -410,14 +410,14 @@ export class GamesQueryRepository {
       .select('p.id', 'p_id')
       .addSelect('p.user', 'u_id')
 
-      // Adding total scores count
+      // total scores count
       .addSelect((qb) => {
         return qb.select('sum(p.score)').from(Player, 'p').where(`(p.userId = :userId)`, {
           userId: userId,
         });
       }, 'scores_sum')
 
-      // Adding average scores count
+      // average scores count
       .addSelect((qb) => {
         return (
           qb
@@ -432,7 +432,7 @@ export class GamesQueryRepository {
         );
       }, 'scores_avg')
 
-      // Adding total games count
+      // total games count
       .addSelect((qb) => {
         return qb
           .select('count(*)')
@@ -444,7 +444,7 @@ export class GamesQueryRepository {
           });
       }, 'total_games')
 
-      // Adding wins
+      //  wins
       .addSelect((qb) => {
         return qb
           .select('count(*)')
@@ -459,7 +459,7 @@ export class GamesQueryRepository {
           });
       }, 'wins')
 
-      // Adding losses
+      //  losses
       .addSelect((qb) => {
         return qb
           .select('count(*)')
@@ -474,7 +474,7 @@ export class GamesQueryRepository {
           });
       }, 'losses')
 
-      // Adding draws
+      //  draws
       .addSelect((qb) => {
         return qb
           .select('count(*)')

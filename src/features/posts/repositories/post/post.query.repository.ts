@@ -95,8 +95,6 @@ export class PostQueryRepository {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     userId: number | null,
   ): Promise<PaginationWithItems<OutputPostType> | null> {
-    //TODO через менеджер сделать нада
-
     const orderField = sortData.sortBy === 'blogName' ? 'blog.name' : `post.${sortData.sortBy}`;
     const orderCriteria = { [orderField]: sortData.sortDirection };
     const skip = (sortData.pageNumber - 1) * sortData.pageSize;

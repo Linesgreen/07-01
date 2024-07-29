@@ -56,14 +56,13 @@ export class Game {
   @ManyToMany(() => Question, (question) => question.games)
   questions: Question[];
 
-  //TODO переделать
-  static checkSortingField(value: any) {
-    const g = new Game();
-    g.id = randomUUID();
-    g.status = GameStatus.Finished;
-    g.pairCreatedDate = new Date();
-    g.startGameDate = new Date();
-    g.finishGameDate = new Date();
-    return g.hasOwnProperty(value);
+  static checkSortingField(value: any): boolean {
+    const game = new Game();
+    game.id = randomUUID();
+    game.status = GameStatus.Finished;
+    game.pairCreatedDate = new Date();
+    game.startGameDate = new Date();
+    game.finishGameDate = new Date();
+    return game.hasOwnProperty(value);
   }
 }

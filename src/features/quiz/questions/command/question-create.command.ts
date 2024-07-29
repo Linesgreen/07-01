@@ -12,13 +12,11 @@ export class QuestionCreateCommand {
 export class QuestionCreateUseCase implements ICommandHandler<QuestionCreateCommand> {
   constructor(private readonly questionsRepository: QuestionsRepository) {}
 
-  //TODO переделать на конструктор
   async execute(command: QuestionCreateCommand): Promise<string> {
-    const question = new Question();
-    question.body = command.questionInputDto.body;
-    question.correctAnswers = command.questionInputDto.correctAnswers;
-    question.published = false;
-    question.createdAt = new Date();
+    const question = Question.create({
+      body: command.questionInputDto.body,
+      correctAnswers: command.questionInputDto.correctAnswers,
+    });
 
     return this.questionsRepository.saveQuestion(question);
   }

@@ -1,6 +1,6 @@
 export class PaginationWithItems<T> {
   public pagesCount: number;
-  public items: T[]; // Явное объявление
+  public items: T[];
 
   constructor(
     public page: number,
@@ -8,12 +8,11 @@ export class PaginationWithItems<T> {
     public totalCount: number,
     items: T[],
   ) {
-    this.pagesCount = Math.ceil(totalCount / pageSize); // Инициализация перед items
-    this.items = items; // Присвоение значения
+    this.pagesCount = Math.ceil(totalCount / pageSize);
+    this.items = items;
   }
 }
 
-//TODO убрать его
 export class Paginator<T> {
   public pagesCount: number;
   public page: number;

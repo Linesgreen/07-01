@@ -35,15 +35,28 @@ export class Question {
   @JoinTable()
   games: Game[];
 
-  //TODO убрать нафиг
-  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-  static checkSortingField(value: any) {
-    const q = new Question();
-    q.id = randomUUID();
-    q.body = '';
-    q.published = false;
-    q.createdAt = new Date();
-    q.updatedAt = new Date();
-    return q.hasOwnProperty(value);
+  static create({ body, correctAnswers }: { body: string; correctAnswers: string[] }): Question {
+    const question = new Question();
+    question.body = body;
+    question.correctAnswers = correctAnswers;
+    question.published = false;
+    question.createdAt = new Date();
+    return question;
+  }
+
+  static checkSortingField(value: any): boolean {
+    const mockQuestion = new Question();
+    mockQuestion.id = randomUUID();
+    mockQuestion.body = '';
+    mockQuestion.published = false;
+    mockQuestion.createdAt = new Date();
+    mockQuestion.updatedAt = new Date();
+    return mockQuestion.hasOwnProperty(value);
+  }
+
+  update({ body, correctAnswers }: { body: string; correctAnswers: string[] }): void {
+    this.body = body;
+    this.correctAnswers = correctAnswers;
+    this.updatedAt = new Date();
   }
 }

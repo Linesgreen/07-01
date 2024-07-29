@@ -33,7 +33,6 @@ export class SaUserController {
     protected readonly commandBus: CommandBus,
   ) {}
 
-  //TODO и шо тут делать по итогу?
   @Post('')
   @HttpCode(201)
   async createUser(@Body() userCreateData: UserCreateModel): Promise<UserOutputType> {

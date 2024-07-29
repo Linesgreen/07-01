@@ -22,7 +22,7 @@ export class AnswerSendHandler implements ICommandHandler<AnswerSendCommand> {
     private readonly answerRepository: AnswersRepository,
   ) {}
 
-  async execute(command: AnswerSendCommand) {
+  async execute(command: AnswerSendCommand): Promise<Result<string> | Result<{ gameId: string }>> {
     const currentGame = await this.gamesRepository.findGameForAnswer(command.data.userId);
 
     if (!currentGame) return Result.Err(ErrorStatus.FORBIDDEN, 'Game not found');
@@ -51,7 +51,6 @@ export class AnswerSendHandler implements ICommandHandler<AnswerSendCommand> {
     answer.question = currentQuestion;
     answer.answerStatus = answerStatus;
     answer.addedAt = new Date();
-    console.log('22222222222222222222222222');
 
     await this.answerRepository.save(answer);
 
@@ -66,8 +65,6 @@ export class AnswerSendHandler implements ICommandHandler<AnswerSendCommand> {
       currentGame.finishingExpirationDate = add(new Date(), {
         seconds: 9,
       });
-
-      console.log('333333333333333333333333333333');
 
       await this.gamesRepository.save(currentGame);
     }

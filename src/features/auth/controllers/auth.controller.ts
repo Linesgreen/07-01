@@ -78,7 +78,6 @@ export class AuthController {
   }
 
   // Метод для обновления токенов
-  //TODO вынести кукис в отдельный метод
   @UseGuards(CookieJwtGuard)
   @Post('refresh-token')
   @HttpCode(200)

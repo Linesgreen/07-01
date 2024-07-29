@@ -21,10 +21,12 @@ export class QuestionUpdateUseCase implements ICommandHandler<QuestionUpdateComm
     if (!question) {
       return null;
     }
-    //TODO переделать update
-    question.body = command.questionInputDto.body;
-    question.correctAnswers = command.questionInputDto.correctAnswers;
-    question.updatedAt = new Date();
+
+    question.update({
+      body: command.questionInputDto.body,
+      correctAnswers: command.questionInputDto.correctAnswers,
+    });
+
     await this.questionsRepository.saveQuestion(question);
     return question;
   }
