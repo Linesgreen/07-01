@@ -16,5 +16,7 @@ RUN pnpm install --prod
 # Копирование всех файлов
 COPY . .
 
+RUN pnpm build
+
 # Запуск приложения
 CMD ["pnpm", "start"]
