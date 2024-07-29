@@ -6,8 +6,8 @@ WORKDIR /app
 
 RUN npm install -g pnpm
 
-COPY package*.json ./
-COPY pnpm-lock.yaml ./
+COPY package*.json pnpm-lock.yaml ./
+
 
 # Установка зависимостей
 RUN pnpm install
