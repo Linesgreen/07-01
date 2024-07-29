@@ -13,7 +13,8 @@ COPY package.json ./
 #COPY pnpm-lock.yaml ./
 
 # Установка зависимостей
-RUN pnpm install
+RUN pnpm install --shamefully-hoist
+#RUN pnpm install
 
 # Копирование всех файлов
 COPY . .
