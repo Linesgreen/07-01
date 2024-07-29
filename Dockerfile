@@ -10,7 +10,7 @@ RUN corepack prepare yarn@stable --activate
 COPY package.json yarn.lock ./
 
 # Установка зависимостей
-RUN yarn install --force
+RUN yarn install
 
 COPY . .
 
