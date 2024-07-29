@@ -11,7 +11,7 @@ COPY package.json ./
 COPY pnpm-lock.yaml ./
 
 # Установка только production зависимостей
-RUN pnpm install --prod
+RUN pnpm install
 
 # Копирование всех файлов
 COPY . .
