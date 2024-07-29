@@ -3,9 +3,9 @@ import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { config } from 'dotenv';
 
 // Определяем среду выполнения
-const environment = 'development'; //process.env.NODE_ENV || 'development';
+const environment = 'development';
 // Загружаем соответствующий файл .env
-config({ path: `.env.${environment}` });
+config();
 
 class ConfigService {
   constructor(private env: { [k: string]: string | undefined }) {}
