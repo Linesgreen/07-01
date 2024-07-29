@@ -2,8 +2,7 @@ FROM node:21
 
 WORKDIR /app
 
-# Установка необходимых инструментов для сборки нативных зависимостей
-RUN apk add --no-cache python3 make g++ libc6-compat openssl-dev
+
 
 # Установка corepack для управления Yarn
 RUN npm install -g corepack
