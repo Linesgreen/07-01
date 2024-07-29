@@ -1,23 +1,18 @@
-FROM node:18-alpine
+FROM node:16-alpine
 
 WORKDIR /app
 
-# Установка Python для node-gyp и других инструментов
-RUN apk add --no-cache python3 make g++
-
+# Установка pnpm
 RUN npm install -g pnpm
 
-COPY package*.json ./
-#COPY pnpm-lock.yaml ./
+# Копирование файлов package.json и pnpm-lock.yaml
+COPY package.json pnpm-lock.yaml ./
 
 # Установка зависимостей
 RUN pnpm install
 
+# Копирование всех файлов
 COPY . .
 
-# Сборка приложения
-RUN pnpm build
-
-EXPOSE 5000
-
-CMD [ "pnpm", "start:prod" ]
+# Запуск приложения
+CMD ["npm", "start"]
