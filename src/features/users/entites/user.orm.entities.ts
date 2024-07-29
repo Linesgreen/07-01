@@ -1,4 +1,4 @@
-import crypto from 'crypto';
+import { randomUUID } from 'crypto';
 import { add } from 'date-fns';
 import { BaseEntity, Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
@@ -61,7 +61,7 @@ export class User extends BaseEntity {
     user.passwordHash = passwordHash;
     user.createdAt = new Date();
 
-    user.confirmationCode = crypto.randomUUID();
+    user.confirmationCode = randomUUID();
     user.expirationDate = add(new Date(), {
       hours: 1,
     });
@@ -74,7 +74,7 @@ export class User extends BaseEntity {
     this.passwordHash = passwordHash;
   }
   updateConfirmationCode(): void {
-    this.confirmationCode = crypto.randomUUID();
+    this.confirmationCode = randomUUID();
     this.expirationDate = add(new Date(), { hours: 1 });
   }
 

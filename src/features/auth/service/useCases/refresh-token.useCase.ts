@@ -1,5 +1,5 @@
 import { CommandHandler } from '@nestjs/cqrs';
-import crypto from 'crypto';
+import { randomUUID } from 'crypto';
 import { DataSource, EntityManager } from 'typeorm';
 
 import { TransactionalCommandHandler } from '../../../../infrastructure/abstract-classes/transaction-commandHandler.abstract';
@@ -35,7 +35,7 @@ export class RefreshTokenUseCase extends TransactionalCommandHandler<RefreshToke
     if (!session) return Result.Err(ErrorStatus.NOT_FOUND, 'Session not found');
 
     const deviceId = session.deviceId;
-    const newTokenKey = crypto.randomUUID();
+    const newTokenKey = randomUUID();
 
     await this.updateAndSaveSession(session, newTokenKey, entityManager);
     const { token, refreshToken } = await this.authService.generateTokenPair(userId, newTokenKey, deviceId);

@@ -1,6 +1,6 @@
 /* eslint-disable no-underscore-dangle */
 import { CommandHandler } from '@nestjs/cqrs';
-import crypto from 'crypto';
+import { randomUUID } from 'crypto';
 import { DataSource, EntityManager } from 'typeorm';
 
 import { TransactionalCommandHandler } from '../../../../infrastructure/abstract-classes/transaction-commandHandler.abstract';
@@ -33,8 +33,8 @@ export class UserLoginUseCase extends TransactionalCommandHandler<UserLoginComma
     entityManager: EntityManager,
   ): Promise<Result<{ token: string; refreshToken: string }>> {
     const { userId, ip, userAgent } = command;
-    const tokenKey = crypto.randomUUID();
-    const deviceId = crypto.randomUUID();
+    const tokenKey = randomUUID();
+    const deviceId = randomUUID();
     await this.createSession({ userId, deviceId, ip, title: userAgent, tokenKey }, entityManager);
     const { token, refreshToken } = await this.authService.generateTokenPair(userId, tokenKey, deviceId);
     return Result.Ok({ token, refreshToken });
