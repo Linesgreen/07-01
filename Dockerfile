@@ -3,7 +3,7 @@ FROM node:21-alpine
 WORKDIR /app
 
 # Установка необходимых инструментов для сборки нативных зависимостей
-RUN apk add --no-cache python3 make g++
+RUN apk add --no-cache python3 py3-pip make g++
 
 # Установка corepack для управления Yarn
 RUN npm install -g corepack
@@ -20,6 +20,6 @@ COPY . .
 # Сборка приложения
 RUN yarn build
 
-EXPOSE 5000
+EXPOSE 5001
 
 CMD ["yarn", "start:prod"]
