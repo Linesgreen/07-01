@@ -1,8 +1,8 @@
-FROM node:21-alpine
+FROM node:18-alpine
 
 WORKDIR /app
 
-# Установка Python для node-gyp
+# Установка Python для node-gyp и других инструментов
 RUN apk add --no-cache python3 make g++
 
 RUN npm install -g pnpm
