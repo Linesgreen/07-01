@@ -2,8 +2,10 @@ FROM node:21-alpine
 
 WORKDIR /app
 
-# Установка yarn нужной версии
-RUN npm install -g yarn@4.1.0
+# Установка corepack для управления Yarn
+RUN npm install -g corepack
+RUN corepack enable
+RUN corepack prepare yarn@stable --activate
 
 COPY package.json yarn.lock ./
 
