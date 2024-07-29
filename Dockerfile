@@ -2,21 +2,23 @@ FROM node:18-alpine
 
 WORKDIR /app
 
+# Установка Python, make и g++
+#RUN apk add --no-cache python3 make g++
 
 # Установка pnpm
 RUN npm install -g pnpm
 
-# Копирование файлов package.json и pnpm-lock.yaml
-COPY package.json ./
-COPY pnpm-lock.yaml ./
+# Копирование файлов package.json и pnpm-lock.yaml (если есть)
+COPY package.json pnpm-lock.yaml* ./
 
-# Установка только production зависимостей
+# Установка зависимостей
 RUN pnpm install
 
-# Копирование всех файлов
+# Копирование исходного кода
 COPY . .
 
-RUN pnpm build
+# Сборка приложения
+RUN pnpm run build
 
 # Запуск приложения
-CMD ["pnpm", "start"]
+CMD ["pnpm", "start:prod"]
