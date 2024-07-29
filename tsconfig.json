@@ -1,11 +1,6 @@
 {
   "compilerOptions": {
-    "esModuleInterop": true,
     "module": "commonjs",
-    "strict": true,
-    "moduleResolution": "node",
-    "rootDir": "./src",
-    "resolveJsonModule": true,
     "declaration": true,
     "removeComments": true,
     "emitDecoratorMetadata": true,
@@ -22,5 +17,7 @@
     "strictBindCallApply": false,
     "forceConsistentCasingInFileNames": false,
     "noFallthroughCasesInSwitch": false,
+    "esModuleInterop": true,
+    "typeRoots": ["./node_modules/@types", "./custom.d.ts"]
   }
 }
