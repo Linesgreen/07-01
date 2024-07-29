@@ -1,4 +1,5 @@
 import { CommandHandler } from '@nestjs/cqrs';
+import crypto from 'crypto';
 import { DataSource, EntityManager } from 'typeorm';
 
 import { TransactionalCommandHandler } from '../../../../infrastructure/abstract-classes/transaction-commandHandler.abstract';

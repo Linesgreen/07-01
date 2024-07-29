@@ -5,6 +5,7 @@ import { ThrottlerGuard } from '@nestjs/throttler';
 import { MailerService } from '@nestjs-modules/mailer';
 import * as mockdate from 'mockdate';
 import request from 'supertest';
+import crypto from 'crypto';
 
 import { AppModule } from '../../src/app.module';
 import { RecoveryCodeIsValidConstraint } from '../../src/infrastructure/decorators/validate/password-recovery-code.decorator';

@@ -1,3 +1,4 @@
+import crypto from 'crypto';
 import { add } from 'date-fns';
 import { BaseEntity, Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 

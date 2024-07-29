@@ -2,6 +2,10 @@
   "compilerOptions": {
     "esModuleInterop": true,
     "module": "commonjs",
+    "strict": true,
+    "moduleResolution": "node",
+    "rootDir": "./src",
+    "resolveJsonModule": true,
     "declaration": true,
     "removeComments": true,
     "emitDecoratorMetadata": true,
@@ -17,6 +21,9 @@
     "noImplicitAny": false,
     "strictBindCallApply": false,
     "forceConsistentCasingInFileNames": false,
-    "noFallthroughCasesInSwitch": false
-  }
+    "noFallthroughCasesInSwitch": false,
+    "types": ["node"]  // Добавьте эту строку
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", "dist"]
 }
