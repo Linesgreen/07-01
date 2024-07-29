@@ -1,24 +1,22 @@
-FROM node:21-bullseye-slim
+FROM node:21-alpine
 
 WORKDIR /app
 
 
 
-# Установка corepack для управления Yarn
-RUN npm install -g corepack
-RUN corepack enable
-RUN corepack prepare yarn@stable --activate
+RUN npm install -g pnpm
 
-COPY package.json yarn.lock ./
+COPY package*.json ./
+COPY pnpm-lock.yaml ./
 
 # Установка зависимостей
-RUN yarn install
+RUN pnpm install
 
 COPY . .
 
 # Сборка приложения
-RUN yarn build
+RUN pnpm build
 
 EXPOSE 5000
 
-CMD ["yarn", "start:prod"]
+CMD [ "pnpm", "start:prod" ]

@@ -46,7 +46,6 @@
     "eslint-plugin-unused-imports": "^3.0.0",
     "handlebars": "^4.7.8",
     "mockdate": "^3.0.5",
-    "mongoose": "^8.1.1",
     "nodemailer": "^6.9.9",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
@@ -104,5 +103,5 @@
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"
   },
-  "packageManager": "yarn@4.1.0"
+  "packageManager": "pnpm@9.1.4"
 }
