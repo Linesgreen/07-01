@@ -18,7 +18,7 @@ export class GameFinishHandler implements ICommandHandler<GameFinishCommand> {
     private readonly playerRepository: PlayerRepository,
   ) {}
 
-  @Interval(1000)
+  @Interval(100000000)
   async execute(command: GameFinishCommand): Promise<void> {
     await this.transactionHelper.doTransactional(async () => {
       const games = await this.gamesRepository.findGamesToFinish();

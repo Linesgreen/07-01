@@ -22,3 +22,4 @@ RUN pnpm run build
 
 # Запуск приложения
 CMD ["pnpm", "start:prod"]
+

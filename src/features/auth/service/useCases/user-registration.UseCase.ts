@@ -1,7 +1,5 @@
-import { CommandHandler } from '@nestjs/cqrs';
-import { DataSource, EntityManager } from 'typeorm';
+import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 
-import { TransactionalCommandHandler } from '../../../../infrastructure/abstract-classes/transaction-commandHandler.abstract';
 import { ErrorStatus, Result } from '../../../../infrastructure/object-result/objcet-result';
 import { MailService } from '../../../../mail/mail.service';
 import { UserRepository } from '../../../users/repositories/user.repository';
@@ -13,22 +11,20 @@ export class UserRegistrationCommand {
 }
 
 @CommandHandler(UserRegistrationCommand)
-export class UserRegistrationUseCase extends TransactionalCommandHandler<UserRegistrationCommand> {
+export class UserRegistrationUseCase implements ICommandHandler<UserRegistrationCommand> {
   constructor(
     protected userService: UserService,
     protected mailService: MailService,
     private userOrmRepository: UserRepository,
-    dataSource: DataSource,
-  ) {
-    super(dataSource);
-  }
+  ) {}
 
-  async handle(command: UserRegistrationCommand, entityManager: EntityManager): Promise<Result<string>> {
+  async execute(command: UserRegistrationCommand): Promise<Result<string>> {
     const { email, login } = command.userData;
 
-    const createResult = await this.userService.createUser(command.userData, entityManager);
+    const createResult = await this.userService.createUser(command.userData);
 
     const userId = createResult.value.id;
+    console.log(userId);
     const user = await this.userOrmRepository.getById(userId);
 
     if (!user) return Result.Err(ErrorStatus.SERVER_ERROR, 'User created but not found');

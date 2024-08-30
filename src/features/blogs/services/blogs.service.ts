@@ -11,6 +11,7 @@ export class BlogsService {
 
   async createBlog(blogData: BlogCreateModel): Promise<Result<{ id: number }>> {
     const newBlog = Blog_Orm.createBlogModel(blogData);
+
     const blogId = await this.blogRepository.save(newBlog);
     return Result.Ok(blogId);
   }

@@ -29,7 +29,7 @@ export class CommentQueryRepository {
           .from(Comment_like_Orm, 'comment_like')
           .where('comment_like.commentId = comment.id')
           .andWhere('comment_like.likeStatus = :likeStatus', { likeStatus: LikeStatus.Like })
-          .groupBy('comment_like.commentId');
+          .groupBy('comment_like.commentId'); //мб не нужна
       }, 'likes_likeCount')
       .addSelect((qb1) => {
         return qb1
@@ -37,7 +37,7 @@ export class CommentQueryRepository {
           .from(Comment_like_Orm, 'comment_like')
           .where('comment_like.commentId = comment.id')
           .andWhere('comment_like.likeStatus = :dislikeStatus', { dislikeStatus: LikeStatus.Dislike })
-          .groupBy('comment_like.commentId');
+          .groupBy('comment_like.commentId'); //мб не нужна
       }, 'likes_dislikeCount')
       .addSelect(['comment.id', 'comment.content', 'comment.createdAt', 'comment.userId', 'user.login'])
       .where('comment.id = :id', { id: id })
@@ -69,7 +69,7 @@ export class CommentQueryRepository {
           .from(Comment_like_Orm, 'comment_like')
           .where('comment_like.commentId = comment.id')
           .andWhere('comment_like.likeStatus = :likeStatus', { likeStatus: LikeStatus.Like })
-          .groupBy('comment_like.commentId');
+          .groupBy('comment_like.commentId'); //мб не нужна
       }, 'likes_likeCount')
       .addSelect((qb1) => {
         return qb1
@@ -77,7 +77,7 @@ export class CommentQueryRepository {
           .from(Comment_like_Orm, 'comment_like')
           .where('comment_like.commentId = comment.id')
           .andWhere('comment_like.likeStatus = :dislikeStatus', { dislikeStatus: LikeStatus.Dislike })
-          .groupBy('comment_like.commentId');
+          .groupBy('comment_like.commentId'); //мб не нужна
       }, 'likes_dislikeCount')
       .addSelect(['comment.id', 'comment.content', 'comment.createdAt', 'comment.userId', 'user.login'])
       .where('comment.isActive = true')

@@ -2,6 +2,7 @@ import { randomUUID } from 'crypto';
 import { add } from 'date-fns';
 import { BaseEntity, Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
+import { Blog_Orm } from '../../blogs/entites/blog.orm.entities';
 import { Comment_Orm } from '../../comments/entites/comment.orm.entities';
 import { Comment_like_Orm } from '../../comments/entites/comment-like.entities';
 import { Post_like_Orm } from '../../posts/entites/post-like.orm.entities';
@@ -37,6 +38,9 @@ export class User extends BaseEntity {
 
   @Column({ default: true })
   isActive: boolean;
+
+  @OneToMany(() => Blog_Orm, (blog) => blog.user)
+  blogs: Blog_Orm[];
 
   @OneToMany(() => Session_Orm, (s) => s.userId)
   sessions: Session_Orm[];

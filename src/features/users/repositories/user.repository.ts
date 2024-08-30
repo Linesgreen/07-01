@@ -19,7 +19,7 @@ export class UserRepository {
   async getById(id: number, entityManager?: EntityManager): Promise<User | null> {
     const userRepository = this._getUserRepository(entityManager);
 
-    const user = await userRepository.findOne({ where: { id, isActive: true } });
+    const user = await userRepository.findOne({ where: { id } });
     if (!user) return null;
 
     return user;

@@ -57,8 +57,12 @@ export class AuthController {
   @Post('registration')
   @HttpCode(204)
   async userRegistration(@Body() registrationData: UserRegistrationModel): Promise<void> {
-    const result = await this.commandBus.execute(new UserRegistrationCommand(registrationData));
-    if (result.isFailure()) ErrorResulter.proccesError(result);
+    try {
+      const result = await this.commandBus.execute(new UserRegistrationCommand(registrationData));
+      if (result.isFailure()) ErrorResulter.proccesError(result);
+    } catch (e) {
+      console.log(e);
+    }
   }
 
   // Метод для подтверждения регистрации по электронной почте
@@ -90,7 +94,10 @@ export class AuthController {
 
     const tokenPair = result.value;
 
-    res.cookie('refreshToken', tokenPair.refreshToken, { httpOnly: true, secure: true });
+    res.cookie('refreshToken', tokenPair.refreshToken, {
+      httpOnly: true,
+      secure: true,
+    });
     return { accessToken: tokenPair.token };
   }
 

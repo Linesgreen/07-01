@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-this-alias */
-import { BaseEntity, Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { BaseEntity, Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 import { Post_Orm } from '../../posts/entites/post.orm.entities';
+import { User } from '../../users/entites/user.orm.entities';
 import { BlogCreateModel } from '../types/input';
 
 @Entity({ name: 'blogs_orm' })
@@ -9,7 +10,7 @@ export class Blog_Orm extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ collation: 'C' })
   name: string;
 
   @Column()
@@ -29,6 +30,13 @@ export class Blog_Orm extends BaseEntity {
 
   @OneToMany(() => Post_Orm, (p) => p.blog)
   posts: Post_Orm[];
+
+  @ManyToOne(() => User, (u) => u.blogs, { nullable: true })
+  @JoinColumn()
+  user: User | null;
+
+  @Column()
+  userId: number;
 
   static createBlogModel(blogData: BlogCreateModel): Blog_Orm {
     const blog = new Blog_Orm();
@@ -56,5 +64,9 @@ export class Blog_Orm extends BaseEntity {
   async delete(): Promise<void> {
     this.isActive = false;
     await this.save();
+  }
+
+  addUserToBlog({ userId }: { userId: number }): void {
+    this.userId = userId;
   }
 }

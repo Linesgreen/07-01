@@ -11,11 +11,13 @@ import * as process from 'process';
 import { authProviders, authUseCases } from './features/auth';
 import { AuthController } from './features/auth/controllers/auth.controller';
 import { GetInformationAboutUserCase } from './features/auth/service/useCases/user-get-information-about-me.useCase';
-import { blogsProviders, blogsUseCases } from './features/blogs';
+import { BloggerBlogsController } from './features/blogger/controller/blogger.blogs.controller';
+import { bloggerUserCases, blogsProviders, blogsUseCases } from './features/blogs';
 import { BlogsController } from './features/blogs/controllers/blogs.controller';
 import { SaBlogsController } from './features/blogs/controllers/sa.blogs.controller';
 import { BlogIsExistConstraint } from './features/blogs/decorators/blog-is-exist.decorator';
 import { Blog_Orm } from './features/blogs/entites/blog.orm.entities';
+import { BindBlogsToUserHandler } from './features/blogs/services/useCase/bind-blog-to-user.userCase';
 import { commentProviders, commentUseCases } from './features/comments';
 import { CommentsController } from './features/comments/controller/comments.controller';
 import { Comment_Orm } from './features/comments/entites/comment.orm.entities';
@@ -89,6 +91,7 @@ const decorators = [
     TestingController,
     CommentsController,
     SecurityController,
+    BloggerBlogsController,
   ],
   providers: [
     ...blogsProviders,
@@ -98,6 +101,7 @@ const decorators = [
     ...commentProviders,
     ...authUseCases,
     ...blogsUseCases,
+    ...bloggerUserCases,
     ...commentUseCases,
     ...postsUseCases,
     DeleteUserUseCase,
@@ -107,6 +111,7 @@ const decorators = [
     QueryPaginationPipe,
     UserRepository,
     TransactionHelper,
+    BindBlogsToUserHandler,
   ],
 })
 export class AppModule implements NestModule {

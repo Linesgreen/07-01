@@ -179,11 +179,9 @@ export class PostQueryRepository {
   }
 
   private async _getLastThreeLikes(postIds: number[]): Promise<LastLike[]> {
+    console.log(postIds, 'postIds');
     const lastThreeLikes: LastLikeFromDB[] = await this.postLikeRepository
       .createQueryBuilder('likes')
-      .select('likes.*')
-      .addSelect('likes_with_rn.rn')
-      .addSelect('user.login', 'login')
       .leftJoin(
         (subQuery) => {
           return subQuery
@@ -196,7 +194,10 @@ export class PostQueryRepository {
         'likes_with_rn',
         '"likes"."id" = likes_with_rn."likeId"',
       )
-      .leftJoin('user_orm', 'user', 'user.id = likes."userId"')
+      .select('likes')
+      .addSelect('likes_with_rn.rn')
+      .leftJoin('user', 'user', 'user.id = likes."userId"')
+      .addSelect('user.login', 'login')
       .where('likes_with_rn.rn <= 3')
       .getRawMany();
 

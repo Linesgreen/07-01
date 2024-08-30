@@ -19,7 +19,6 @@ export class QuestionsRepository {
     return repository.createQueryBuilder('q').where('q.published = true').orderBy('RANDOM()').take(number).getMany();
   }
 
-  // ***** Find question operations *****
   async findQuestion(questionId: string): Promise<Question | null> {
     const repository = this.transactionHelper.getManager().getRepository(Question);
 

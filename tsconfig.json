@@ -18,6 +18,8 @@
     "forceConsistentCasingInFileNames": false,
     "noFallthroughCasesInSwitch": false,
     "esModuleInterop": true,
-    "typeRoots": ["./node_modules/@types", "./custom.d.ts"]
-  }
+    "typeRoots": ["./node_modules/@types", "./custom.d.ts"],
+
+  },
+  "include": ["./src"]
 }
